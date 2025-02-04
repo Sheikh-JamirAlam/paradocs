@@ -18,8 +18,6 @@ wss.on("connection", function connection(ws) {
       }
     });
   });
-
-  ws.send("Hello! Message from server!!");
 });
 
 const PORT = process.env.PORT ? process.env.PORT : 8080;
