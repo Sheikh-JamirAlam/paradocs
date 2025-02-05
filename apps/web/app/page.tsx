@@ -3,7 +3,7 @@ import TextSpace from "./components/TextSpace";
 export default function Home() {
   return (
     <div className="">
-      <main className="">
+      <main className="h-screen">
         <section className="h-screen">
           <TextSpace />
         </section>
