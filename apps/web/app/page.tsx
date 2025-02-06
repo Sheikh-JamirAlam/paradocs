@@ -1,12 +1,10 @@
-import TextSpace from "./components/TextSpace";
+import Navbar from "./components/Navbar";
 
 export default function Home() {
   return (
-    <div className="">
-      <main className="h-screen">
-        <section className="h-screen">
-          <TextSpace />
-        </section>
+    <div className="font-sans">
+      <main className="">
+        <Navbar />
       </main>
       <footer className=""></footer>
     </div>
