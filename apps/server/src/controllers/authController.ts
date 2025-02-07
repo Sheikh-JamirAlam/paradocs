@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { registerUser } from "../services/userService";
+import { generateToken } from "../utils/jwt.service";
 
 interface User {
   kindeId: string;
@@ -17,10 +18,11 @@ export const signupUser = async (req: Request, res: Response): Promise<void> => 
     }
 
     const dbUser = await registerUser(user);
-    res.status(200).json({ message: "User logged in", user: dbUser });
-    return;
+
+    const token = generateToken(dbUser.id);
+
+    res.status(200).json({ message: "User logged in", user: dbUser, token });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
-    return;
   }
 };
