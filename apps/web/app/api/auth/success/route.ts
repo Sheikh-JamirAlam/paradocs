@@ -1,6 +1,7 @@
 import axios from "axios";
 import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { NextResponse } from "next/server";
+import { BACKEND_URL, FRONTEND_URL } from "../../../lib/constants/urls";
 
 export async function GET() {
   const { getUser } = getKindeServerSession();
@@ -8,14 +9,14 @@ export async function GET() {
 
   if (!user || user == null || !user.id) throw new Error("Something went wrong with authentication" + user);
 
-  const { data } = await axios.post("http://localhost:8080/auth/signup", { kindeId: user.id, firstName: user.given_name ?? "", lastName: user.family_name ?? "", email: user.email ?? "" });
+  const { data } = await axios.post(`${BACKEND_URL}/auth/signup`, { kindeId: user.id, firstName: user.given_name ?? "", lastName: user.family_name ?? "", email: user.email ?? "" });
 
-  if (!data.accessToken) {
+  if (!data.token) {
     console.error("Access token is missing from the response");
-    return NextResponse.redirect(new URL("/", "http://localhost:3000"));
+    return NextResponse.redirect(new URL("/", FRONTEND_URL));
   }
 
-  const response = NextResponse.redirect(new URL("/", "http://localhost:3000"));
+  const response = NextResponse.redirect(new URL("/documents", FRONTEND_URL));
 
   response.cookies.set({
     name: "token",

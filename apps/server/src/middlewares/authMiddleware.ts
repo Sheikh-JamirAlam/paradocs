@@ -1,29 +1,24 @@
-// import { Request, Response, NextFunction } from "express";
-// import { KindeClient } from "@kinde-oss/kinde-auth-node";
+import { Request, Response } from "express";
+import { verifyToken } from "../utils/jwt.service";
 
-// const kinde = new KindeClient({
-//   issuer: process.env.KINDE_ISSUER_URL!,
-//   clientId: process.env.KINDE_CLIENT_ID!,
-//   clientSecret: process.env.KINDE_CLIENT_SECRET!,
-// });
+export const checkUserVerificationController = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { authorization: header } = req.headers;
 
-// declare global {
-//   namespace Express {
-//     interface Request {
-//       user?: any;
-//     }
-//   }
-// }
+    if (!header || !header.startsWith("Bearer ")) {
+      res.status(401).json({ message: "Authorization token missing or invalid", isValidUser: false });
+      return;
+    }
 
-// export async function authenticateUser(req: Request, res: Response, next: NextFunction) {
-//   try {
-//     const user = await kinde.getUser(req);
-//     if (!user || !user.id) {
-//       return res.status(401).json({ error: "Unauthorized" });
-//     }
-//     req.user = user;
-//     next();
-//   } catch (error) {
-//     return res.status(401).json({ error: "Invalid authentication" });
-//   }
-// }
+    const token = header.split(" ")[1];
+
+    const payload = await verifyToken(token);
+    if (!payload) {
+      res.status(401).json({ isValidUser: false });
+      return;
+    }
+    res.status(200).json({ isValidUser: true });
+  } catch (error) {
+    res.status(401).json({ error: "Authorization token could not be verified" });
+  }
+};

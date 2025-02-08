@@ -19,7 +19,7 @@ export const signupUser = async (req: Request, res: Response): Promise<void> => 
 
     const dbUser = await registerUser(user);
 
-    const token = generateToken(dbUser.id);
+    const token = await generateToken(dbUser.id);
 
     res.status(200).json({ message: "User logged in", user: dbUser, token });
   } catch (error) {
