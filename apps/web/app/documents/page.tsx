@@ -1,12 +1,13 @@
 "use client";
 
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
+import Navbar from "../components/Navbar";
 
 export default function Home() {
   return (
     <div className="font-sans">
       <main className="">
-        <h1>Hello</h1>
+        <Navbar />
         <LogoutLink>Log out</LogoutLink>
       </main>
       <footer className=""></footer>

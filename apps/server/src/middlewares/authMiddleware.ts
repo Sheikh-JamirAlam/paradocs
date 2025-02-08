@@ -1,5 +1,27 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { verifyToken } from "../utils/jwt.service";
+import { getUserById } from "../services/getUserById";
+
+interface AuthRequest extends Request {
+  user?: any;
+}
+
+export const JWTMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const { authorization: header } = req.headers;
+    if (!header) {
+      throw new Error("Unauthorized");
+    }
+    const token = header.split(" ")[1];
+    const payload = await verifyToken(token);
+    const user = await getUserById(payload.id);
+    req.user = user;
+
+    next();
+  } catch (error) {
+    res.status(401).json({ error: "Authorization token could not be verified" });
+  }
+};
 
 export const checkUserVerificationController = async (req: Request, res: Response): Promise<void> => {
   try {
