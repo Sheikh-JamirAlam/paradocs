@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   const path = request.nextUrl.pathname;
 
   // Public paths that don't require authentication, can be updated later
-  const publicPaths = ["/"];
+  const publicPaths = ["/", "login", "register"];
 
   if (publicPaths.includes(path)) {
     // If the user has a token and trying to access a public route
