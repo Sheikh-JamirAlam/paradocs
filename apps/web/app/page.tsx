@@ -1,5 +1,5 @@
 import Navbar from "./components/Navbar";
-import SignupButton from "./components/SignupButton";
+import SignupButton from "./components/Navbar/SignupButton";
 
 export default function Home() {
   return (

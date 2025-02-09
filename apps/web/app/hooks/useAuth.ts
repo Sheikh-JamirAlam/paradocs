@@ -1,6 +1,9 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { BACKEND_URL } from "../lib/constants/urls";
+import { getSession } from "../server/actions/sessions";
 
 interface User {
   id: string;
@@ -18,11 +21,13 @@ export function useAuth() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
+        const session = await getSession();
         const response = await axios.get(`${BACKEND_URL}/auth/me`, {
-          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${session}`,
+          },
         });
-
-        setUser(response.data.user);
+        setUser(response.data);
       } catch (err) {
         const errorMessage = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to fetch user data";
         setError(errorMessage);
