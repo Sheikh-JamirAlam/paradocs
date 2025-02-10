@@ -1,7 +1,7 @@
 import Navbar from "../components/Navbar";
 import { AddCircle } from "@repo/ui/icons";
 
-export default function Home() {
+export default function Page() {
   return (
     <div className="font-sans">
       <main className="">
