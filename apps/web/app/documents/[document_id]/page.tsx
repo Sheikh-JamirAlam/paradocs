@@ -1,24 +1,52 @@
 "use client";
 
-import { useState } from "react";
-import { useParams } from "next/navigation";
-import { EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import axios from "axios";
-import { BACKEND_URL } from "../../lib/constants/urls";
+import { useState, useEffect, useRef } from "react";
+import { EditorContent, useEditor } from "@tiptap/react";
+import { WebSocket } from "ws";
 
-export default function DocumentEditor() {
-  const { document_id } = useParams();
-  const [socket, setSocket] = useState(null);
-  const [isSaving, setIsSaving] = useState(false);
+const WS_URL = "ws://localhost:8080"; // Your backend WebSocket URL
+
+export default function DocumentEditor({ documentId }: { documentId: string }) {
+  const [socket, setSocket] = useState<WebSocket | null>(null);
+  const [content, setContent] = useState<string>("");
+
+  useEffect(() => {
+    // Establish WebSocket connection
+    const ws = new WebSocket(WS_URL);
+    setSocket(ws);
+
+    ws.onopen = () => console.log("Connected to WebSocket server");
+
+    ws.onmessage = (event) => {
+      const receivedData = JSON.parse(event.data);
+      console.log("Received Data:", receivedData);
+
+      // Update editor content with incoming changes
+      if (receivedData.documentId === documentId) {
+        setContent(receivedData.content);
+      }
+    };
+
+    return () => ws.close(); // Cleanup on component unmount
+  }, [documentId]);
+
+  const editor = useEditor({
+    content: content,
+    onUpdate: ({ editor }) => {
+      const newContent = editor.getHTML();
+      setContent(newContent);
+
+      // Send content update to WebSocket server
+      if (socket) {
+        socket.send(JSON.stringify({ documentId, content: newContent }));
+      }
+    },
+  });
 
   return (
-    <div className="p-4 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-semibold">Document Editor</h1>
-      <div className="border p-4 mt-4">
-        <EditorContent />
-      </div>
-      {isSaving && <p className="text-gray-500 mt-2">Saving...</p>}
+    <div>
+      <h1>Editing Document: {documentId}</h1>
+      <EditorContent editor={editor} />
     </div>
   );
 }
