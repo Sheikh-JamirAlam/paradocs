@@ -1,14 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BACKEND_URL } from "../lib/constants/urls";
 
 export default function useSocket() {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [content, setContent] = useState<string>("");
 
   useEffect(() => {
-    const socket = new WebSocket(`ws://${BACKEND_URL}`);
+    const socket = new WebSocket(`ws://localhost:8080`);
     socket.onopen = () => {
       console.log("Connected to server");
       setSocket(socket);
