@@ -41,20 +41,26 @@ function HeadingSelect({ editor }: ToolbarProps) {
 
 function FontFamilySelect({ editor }: ToolbarProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const fontFamilies = ["Arial", "Times New Roman", "Inter", "'Comic Sans MS', 'Comic Sans'", "cursive", "Courier New", "Verdana"];
+  const fontFamilies = ["Arial", "Times New Roman", "Inter", "'Comic Sans MS', 'Comic Sans'", "Courier New", "Verdana", "var(--font-sans)"];
   if (!editor) return null;
 
   return (
     <div className="flex gap-1">
       <DropdownMenu onOpenChange={setIsOpen}>
-        <DropdownMenuTrigger className={`w-[130px] px-2 py-1 flex items-center justify-between font-medium outline-0 rounded-md cursor-pointer ${isOpen ? "bg-gray-300" : "hover:bg-gray-300"}`}>
-          Font Family
-          <ChevronDownIcon size={16} />
+        <DropdownMenuTrigger className={`w-[100px] px-2 py-1 flex items-center justify-between font-medium outline-0 rounded-md cursor-pointer ${isOpen ? "bg-gray-300" : "hover:bg-gray-300"}`}>
+          <span className="truncate">
+            {editor.getAttributes("textStyle").fontFamily === "'Comic Sans MS', 'Comic Sans'"
+              ? "Comic Sans"
+              : editor.getAttributes("textStyle").fontFamily === "var(--font-sans)"
+                ? "Open Sans"
+                : editor.getAttributes("textStyle").fontFamily || "Arial"}
+          </span>
+          <ChevronDownIcon size={16} className="shrink-0" />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           {fontFamilies.map((family) => (
             <DropdownMenuItem key={family} onClick={() => editor.chain().focus().setFontFamily(family).run()} className="px-4 py-2 cursor-pointer" style={{ fontFamily: family }}>
-              {family}
+              {family === "'Comic Sans MS', 'Comic Sans'" ? "Comic Sans" : family === "var(--font-sans)" ? "Open Sans" : family}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>

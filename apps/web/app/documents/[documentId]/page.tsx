@@ -26,22 +26,22 @@ export default function Page() {
         class: "focus:outline-none print:boder-0 border bg-white border-gray-300 flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text",
       },
     },
-    content: content,
+    // content: content,
     immediatelyRender: false,
-    onUpdate: ({ editor }) => {
-      const newContent = editor.getHTML();
-      updateContent(newContent);
-    },
+    // onUpdate: ({ editor }) => {
+    //   const newContent = editor.getHTML();
+    //   updateContent(newContent);
+    // },
   });
 
-  useEffect(() => {
-    editor?.commands.setContent(content);
-  }, [content, editor]);
+  // useEffect(() => {
+  //   editor?.commands.setContent(content);
+  // }, [content, editor]);
 
   return (
     <div className="size-full overflow-x-auto bg-gray-100 px-4 print:p-0 print:bg-white print:overflow-visible">
       <Toolbar editor={editor} />
-      <div className="min-w-max flex justify-center w-[816px] py-4 print:py-0 mx-auto print:w-full print:min-w-0">
+      <div className="min-w-max flex justify-center w-[816px] py-4 print:py-0 mx-auto print:w-full print:min-w-0 font-[Arial]">
         <EditorContent editor={editor} />
       </div>
     </div>
