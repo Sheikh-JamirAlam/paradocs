@@ -8,6 +8,8 @@ import Underline from "@tiptap/extension-underline";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import TextAlign from "@tiptap/extension-text-align";
+import TextStyle from "@tiptap/extension-text-style";
+import FontFamily from "@tiptap/extension-font-family";
 import useSocket from "../../components/SocketHook";
 import Toolbar from "../../components/Document/Toolbar";
 import { PreserveSpaces } from "../../lib/extensions/tiptap";
@@ -17,7 +19,7 @@ export default function Page() {
   const { content, updateContent } = useSocket();
 
   const editor = useEditor({
-    extensions: [StarterKit, Underline, TaskList, TaskItem.configure({ nested: true }), TextAlign.configure({ types: ["heading", "paragraph"] }), PreserveSpaces],
+    extensions: [StarterKit, Underline, TextStyle, FontFamily, TaskList, TaskItem.configure({ nested: true }), TextAlign.configure({ types: ["heading", "paragraph"] }), PreserveSpaces],
     editorProps: {
       attributes: {
         style: `padding-left: 51px; padding-right: 51px;`,
