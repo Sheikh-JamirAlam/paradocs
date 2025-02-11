@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Editor } from "@tiptap/react";
-import { Bold, Italic, Underline, List, ListOrdered, CheckSquare, AlignLeft, AlignCenter, AlignRight, AlignJustify, ChevronDownIcon } from "lucide-react";
+import { Bold, Italic, Underline, List, ListOrdered, CheckSquare, AlignLeft, AlignCenter, AlignRight, AlignJustify, ChevronDownIcon, MinusIcon, PlusIcon } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface ToolbarProps {
@@ -69,6 +69,66 @@ function FontFamilySelect({ editor }: ToolbarProps) {
   );
 }
 
+function FontSizeSelect({ editor }: ToolbarProps) {
+  const currentFontSize = editor?.getAttributes("textStyle").fontSize ? editor?.getAttributes("textStyle").fontSize.replace("px", "") : "16";
+  const [inputValue, setInputValue] = useState(currentFontSize);
+
+  useEffect(() => {
+    setInputValue(currentFontSize);
+  }, [currentFontSize]);
+
+  const updateFontSize = (newSize: string) => {
+    const size = parseInt(newSize);
+    if (!isNaN(size) && (size > 0 || size < 300)) {
+      editor?.chain().focus().setFontSize(`${size}px`).run();
+      setInputValue(newSize);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      updateFontSize(inputValue);
+      editor?.commands.focus();
+    }
+  };
+
+  const increment = () => {
+    const newSize = parseInt(inputValue) + 1;
+    if (newSize < 300) {
+      updateFontSize(newSize.toString());
+    }
+  };
+
+  const decrement = () => {
+    const newSize = parseInt(inputValue) - 1;
+    if (newSize > 0) {
+      updateFontSize(newSize.toString());
+    }
+  };
+
+  if (!editor) return null;
+
+  return (
+    <div className="flex gap-0.5 items-center">
+      <button className="p-2 rounded-md cursor-pointer hover:bg-gray-300">
+        <MinusIcon size={16} onClick={decrement} />
+      </button>
+      <input
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        onBlur={() => updateFontSize(inputValue)}
+        onKeyDown={handleKeyDown}
+        type="text"
+        className="w-[30px] h-6 px-1 py-1 leading-loose my-auto text-center text-sm font-medium border border-gray-500 rounded-sm focus:outline outline-lime-700"
+      />
+      <button className="p-2 rounded-md cursor-pointer hover:bg-gray-300">
+        <PlusIcon size={16} onClick={increment} />
+      </button>
+    </div>
+  );
+}
+
 function AlignSelect({ editor }: ToolbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   if (!editor) return null;
@@ -119,6 +179,8 @@ export default function Toolbar({ editor }: ToolbarProps) {
       <HeadingSelect editor={editor} />
       <div className="w-[1px] h-5 mx-2 bg-gray-400" />
       <FontFamilySelect editor={editor} />
+      <div className="w-[1px] h-5 mx-2 bg-gray-400" />
+      <FontSizeSelect editor={editor} />
       <div className="w-[1px] h-5 mx-2 bg-gray-400" />
       <div className="flex gap-1">
         <button onClick={() => editor.chain().focus().toggleBold().run()} className={`p-2 rounded-md cursor-pointer ${editor.isActive("bold") ? "bg-gray-300" : "hover:bg-gray-300"}`}>
