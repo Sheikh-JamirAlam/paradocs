@@ -12,6 +12,7 @@ import TextStyle from "@tiptap/extension-text-style";
 import FontFamily from "@tiptap/extension-font-family";
 import Color from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
+import Link from "@tiptap/extension-link";
 import useSocket from "../../components/SocketHook";
 import Toolbar from "../../components/Document/Toolbar";
 import { PreserveSpaces, FontSize } from "../../lib/extensions/tiptap";
@@ -28,6 +29,11 @@ export default function Page() {
       FontFamily,
       Color,
       Highlight.configure({ multicolor: true }),
+      Link.configure({
+        openOnClick: false,
+        autolink: true,
+        defaultProtocol: "https",
+      }),
       TaskList,
       TaskItem.configure({ nested: true }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),

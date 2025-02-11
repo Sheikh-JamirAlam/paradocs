@@ -51,6 +51,16 @@ body {
     font-size: 1rem;
   }
 
+  /* Link styles */
+  a {
+    color: #0b77db;
+    cursor: pointer;
+
+    &:hover {
+      color: #025aac;
+    }
+  }
+
   /* List styles */
   ul,
   ol {
@@ -196,6 +206,7 @@ body {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

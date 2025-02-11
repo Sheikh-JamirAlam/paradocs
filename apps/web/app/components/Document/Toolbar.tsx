@@ -20,8 +20,10 @@ import {
   Redo2,
   Baseline,
   Highlighter,
+  Link2,
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import Chrome from "@uiw/react-color-chrome";
 import { GithubPlacement } from "@uiw/react-color-github";
 
@@ -175,7 +177,7 @@ function ColorPicker({ editor }: ToolbarProps) {
 }
 
 function HighlightColorPicker({ editor }: ToolbarProps) {
-  const [color, setColor] = useState("#000000");
+  const [color, setColor] = useState("#FFFFFF");
   const [isOpen, setIsOpen] = useState(false);
 
   const applyColor = (newColor: string) => {
@@ -193,6 +195,49 @@ function HighlightColorPicker({ editor }: ToolbarProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="p-0 rounded-none">
           <Chrome color={color} showAlpha={false} onChange={(color) => applyColor(color.hex)} placement={GithubPlacement.Left} />
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
+
+function LinkOption({ editor }: ToolbarProps) {
+  const [url, setUrl] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const addLink = () => {
+    if (!url) return;
+
+    editor?.chain().focus().extendMarkRange("link").setLink({ href: url, target: "_blank" }).run();
+    editor?.chain().focus().toggleUnderline().run();
+
+    setIsOpen(false);
+    setUrl("");
+  };
+
+  const removeLink = () => {
+    editor?.chain().focus().extendMarkRange("link").unsetLink().run();
+    setIsOpen(false);
+  };
+
+  if (!editor) return null;
+
+  return (
+    <div className="flex gap-1">
+      <DropdownMenu onOpenChange={setIsOpen}>
+        <DropdownMenuTrigger className={`px-2 py-1 flex items-center justify-between font-medium outline-0 rounded-md cursor-pointer ${isOpen ? "bg-gray-300" : "hover:bg-gray-300"}`}>
+          <Link2 size={16} />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="p-0 rounded-none">
+          <Input type="url" placeholder="Enter link" value={url} onChange={(e) => setUrl(e.target.value)} className="mb-2" />
+          <div className="flex gap-2">
+            <button onClick={addLink} disabled={!url}>
+              Insert
+            </button>
+            <button onClick={removeLink} disabled={!editor.isActive("link")}>
+              Remove
+            </button>
+          </div>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
@@ -273,6 +318,10 @@ export default function Toolbar({ editor }: ToolbarProps) {
         </button>
         <ColorPicker editor={editor} />
         <HighlightColorPicker editor={editor} />
+      </div>
+      <div className="w-[1px] h-5 mx-2 bg-gray-400" />
+      <div className="flex gap-1">
+        <LinkOption editor={editor} />
       </div>
       <div className="w-[1px] h-5 mx-2 bg-gray-400" />
       <div className="flex gap-1">
