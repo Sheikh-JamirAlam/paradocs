@@ -2,8 +2,28 @@
 
 import { useEffect, useState } from "react";
 import { Editor } from "@tiptap/react";
-import { Bold, Italic, Underline, List, ListOrdered, CheckSquare, AlignLeft, AlignCenter, AlignRight, AlignJustify, ChevronDownIcon, MinusIcon, PlusIcon } from "lucide-react";
+import {
+  Bold,
+  Italic,
+  Underline,
+  List,
+  ListOrdered,
+  CheckSquare,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  ChevronDownIcon,
+  MinusIcon,
+  PlusIcon,
+  Undo2,
+  Redo2,
+  Baseline,
+  Highlighter,
+} from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import Chrome from "@uiw/react-color-chrome";
+import { GithubPlacement } from "@uiw/react-color-github";
 
 interface ToolbarProps {
   editor: Editor | null;
@@ -129,6 +149,56 @@ function FontSizeSelect({ editor }: ToolbarProps) {
   );
 }
 
+function ColorPicker({ editor }: ToolbarProps) {
+  const [color, setColor] = useState("#000000");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const applyColor = (newColor: string) => {
+    setColor(newColor);
+    editor?.chain().focus().setColor(newColor).run();
+  };
+
+  if (!editor) return null;
+
+  return (
+    <div className="flex gap-1">
+      <DropdownMenu onOpenChange={setIsOpen}>
+        <DropdownMenuTrigger className={`px-2 py-1 flex items-center justify-between font-medium outline-0 rounded-md cursor-pointer ${isOpen ? "bg-gray-300" : "hover:bg-gray-300"}`}>
+          <Baseline size={16} />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="p-0 rounded-none">
+          <Chrome color={color} showAlpha={false} onChange={(color) => applyColor(color.hex)} placement={GithubPlacement.Left} />
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
+
+function HighlightColorPicker({ editor }: ToolbarProps) {
+  const [color, setColor] = useState("#000000");
+  const [isOpen, setIsOpen] = useState(false);
+
+  const applyColor = (newColor: string) => {
+    setColor(newColor);
+    editor?.chain().focus().setHighlight({ color: newColor }).run();
+  };
+
+  if (!editor) return null;
+
+  return (
+    <div className="flex gap-1">
+      <DropdownMenu onOpenChange={setIsOpen}>
+        <DropdownMenuTrigger className={`px-2 py-1 flex items-center justify-between font-medium outline-0 rounded-md cursor-pointer ${isOpen ? "bg-gray-300" : "hover:bg-gray-300"}`}>
+          <Highlighter size={16} />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="p-0 rounded-none">
+          <Chrome color={color} showAlpha={false} onChange={(color) => applyColor(color.hex)} placement={GithubPlacement.Left} />
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
+
 function AlignSelect({ editor }: ToolbarProps) {
   const [isOpen, setIsOpen] = useState(false);
   if (!editor) return null;
@@ -176,6 +246,15 @@ export default function Toolbar({ editor }: ToolbarProps) {
 
   return (
     <div className="mt-4 px-4 py-1 flex items-center bg-slate-200 rounded-full">
+      <div className="flex gap-1">
+        <button onClick={() => editor.chain().focus().undo().run()} className="p-2 rounded-md cursor-pointer hover:bg-gray-300">
+          <Undo2 size={16} />
+        </button>
+        <button onClick={() => editor.chain().focus().redo().run()} className="p-2 rounded-md cursor-pointer hover:bg-gray-300">
+          <Redo2 size={16} />
+        </button>
+      </div>
+      <div className="w-[1px] h-5 mx-2 bg-gray-400" />
       <HeadingSelect editor={editor} />
       <div className="w-[1px] h-5 mx-2 bg-gray-400" />
       <FontFamilySelect editor={editor} />
@@ -192,6 +271,8 @@ export default function Toolbar({ editor }: ToolbarProps) {
         <button onClick={() => editor.chain().focus().toggleUnderline().run()} className={`p-2 rounded-md cursor-pointer ${editor.isActive("underline") ? "bg-gray-300" : "hover:bg-gray-300"}`}>
           <Underline size={16} />
         </button>
+        <ColorPicker editor={editor} />
+        <HighlightColorPicker editor={editor} />
       </div>
       <div className="w-[1px] h-5 mx-2 bg-gray-400" />
       <div className="flex gap-1">
