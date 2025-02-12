@@ -25,6 +25,10 @@ import {
   ImageIcon,
   UploadIcon,
   SearchIcon,
+  RemoveFormatting,
+  Strikethrough,
+  Printer,
+  SpellCheck,
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -406,6 +410,9 @@ export default function Toolbar({ editor }: ToolbarProps) {
         <button onClick={() => editor.chain().focus().redo().run()} className="p-2 rounded-md cursor-pointer hover:bg-gray-300">
           <Redo2 size={16} />
         </button>
+        <button onClick={() => window.print()} className="p-2 rounded-md cursor-pointer hover:bg-gray-300">
+          <Printer size={16} />
+        </button>
       </div>
       <div className="w-[1px] h-5 mx-2 bg-gray-400" />
       <HeadingSelect editor={editor} />
@@ -423,6 +430,9 @@ export default function Toolbar({ editor }: ToolbarProps) {
         </button>
         <button onClick={() => editor.chain().focus().toggleUnderline().run()} className={`p-2 rounded-md cursor-pointer ${editor.isActive("underline") ? "bg-gray-300" : "hover:bg-gray-300"}`}>
           <Underline size={16} />
+        </button>
+        <button onClick={() => editor.chain().focus().toggleStrike().run()} className={`p-2 rounded-md cursor-pointer ${editor.isActive("strike") ? "bg-gray-300" : "hover:bg-gray-300"}`}>
+          <Strikethrough size={16} />
         </button>
         <ColorPicker editor={editor} />
         <HighlightColorPicker editor={editor} />
@@ -443,6 +453,9 @@ export default function Toolbar({ editor }: ToolbarProps) {
         </button>
         <button onClick={() => editor.chain().focus().toggleTaskList().run()} className={`p-2 rounded-md cursor-pointer ${editor.isActive("taskList") ? "bg-gray-300" : "hover:bg-gray-300"}`}>
           <CheckSquare size={16} />
+        </button>
+        <button onClick={() => editor.chain().focus().unsetAllMarks().run()} className="p-2 rounded-md cursor-pointer hover:bg-gray-300">
+          <RemoveFormatting size={16} />
         </button>
       </div>
     </div>

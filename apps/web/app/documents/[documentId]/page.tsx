@@ -63,7 +63,9 @@ export default function Page() {
 
   return (
     <div className="size-full overflow-x-auto bg-gray-100 px-4 print:p-0 print:bg-white print:overflow-visible">
-      <Toolbar editor={editor} />
+      <div className="print:hidden">
+        <Toolbar editor={editor} />
+      </div>
       <div className="min-w-max flex justify-center w-[816px] py-4 print:py-0 mx-auto print:w-full print:min-w-0 font-[Arial]">
         <EditorContent editor={editor} />
       </div>
