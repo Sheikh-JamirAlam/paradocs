@@ -22,9 +22,13 @@ import {
   Highlighter,
   Link2,
   ExternalLink,
+  ImageIcon,
+  UploadIcon,
+  SearchIcon,
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 const Chrome = dynamic(() => import("@uiw/react-color-chrome"), { ssr: false });
 import { GithubPlacement } from "@uiw/react-color-github";
 import dynamic from "next/dynamic";
@@ -239,7 +243,7 @@ export function LinkOption({ editor }: ToolbarProps) {
         }}
         open={isOpen}
       >
-        <DropdownMenuTrigger className={`px-2 py-1 flex items-center justify-between font-medium outline-0 rounded-md cursor-pointer ${isOpen ? "bg-gray-300" : "hover:bg-gray-300"}`}>
+        <DropdownMenuTrigger className={`px-2 py-2 flex items-center justify-between font-medium outline-0 rounded-md cursor-pointer ${isOpen ? "bg-gray-300" : "hover:bg-gray-300"}`}>
           <Link2 size={16} />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="p-2 bg-white shadow-md rounded-md w-64" onPointerDownOutside={() => setIsOpen(false)}>
@@ -267,6 +271,83 @@ export function LinkOption({ editor }: ToolbarProps) {
           )}
         </DropdownMenuContent>
       </DropdownMenu>
+    </div>
+  );
+}
+
+function ImageOption({ editor }: ToolbarProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isImageUrlDialogOpen, setIsImageUrlDialogOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+
+  const onChange = (src: string) => {
+    editor?.chain().focus().setImage({ src }).run();
+  };
+
+  const onUpload = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const imageUrl = URL.createObjectURL(file);
+        onChange(imageUrl);
+      }
+    };
+    input.click();
+  };
+
+  const handleUrlSubmit = () => {
+    if (imageUrl) {
+      onChange(imageUrl);
+      setImageUrl("");
+      setIsImageUrlDialogOpen(false);
+    }
+  };
+
+  if (!editor) return null;
+
+  return (
+    <div className="flex gap-1">
+      <DropdownMenu onOpenChange={setIsOpen}>
+        <DropdownMenuTrigger className={`p-2 flex items-center justify-between outline-0 ${isOpen ? "bg-gray-300" : "hover:bg-gray-300"} rounded-md cursor-pointer`}>
+          <ImageIcon size={16} />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem onClick={onUpload} className="px-2 py-2 cursor-pointer">
+            <UploadIcon size={16} className="text-black" />
+            Upload
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setIsImageUrlDialogOpen(true)} className="px-2 py-2 cursor-pointer">
+            <SearchIcon size={16} className="text-black" />
+            Paste image url
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <Dialog open={isImageUrlDialogOpen} onOpenChange={setIsImageUrlDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Insert image URL</DialogTitle>
+          </DialogHeader>
+          <Input
+            placeholder="Insert image URL"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                handleUrlSubmit();
+              }
+            }}
+          />
+          <DialogFooter>
+            <button onClick={handleUrlSubmit} className="px-4 py-1 bg-transparent hover:bg-lime-200 transition-colors font-medium cursor-pointer rounded-full">
+              Insert
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -349,6 +430,7 @@ export default function Toolbar({ editor }: ToolbarProps) {
       <div className="w-[1px] h-5 mx-2 bg-gray-400" />
       <div className="flex gap-1">
         <LinkOption editor={editor} />
+        <ImageOption editor={editor} />
       </div>
       <div className="w-[1px] h-5 mx-2 bg-gray-400" />
       <div className="flex gap-1">

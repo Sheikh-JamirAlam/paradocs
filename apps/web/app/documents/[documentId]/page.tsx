@@ -13,6 +13,8 @@ import FontFamily from "@tiptap/extension-font-family";
 import Color from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
+import ImageResize from "tiptap-extension-resize-image";
 import useSocket from "../../components/SocketHook";
 import Toolbar from "../../components/Document/Toolbar";
 import { PreserveSpaces, FontSize } from "../../lib/extensions/tiptap";
@@ -28,6 +30,8 @@ export default function Page() {
       TextStyle,
       FontFamily,
       Color,
+      Image,
+      ImageResize,
       Highlight.configure({ multicolor: true }),
       Link.configure({
         openOnClick: false,
