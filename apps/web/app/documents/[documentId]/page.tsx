@@ -15,11 +15,11 @@ import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
 import useSocket from "../../components/SocketHook";
 import Toolbar from "../../components/Document/Toolbar";
-import { PreserveSpaces, FontSize } from "../../lib/extensions/tiptap";
+import { PreserveSpaces, FontSize, CustomDeleteBackward } from "../../lib/extensions/tiptap";
 
 export default function Page() {
-  const { documentId } = useParams();
-  const { content, updateContent } = useSocket();
+  // const { documentId } = useParams();
+  // const { content, updateContent } = useSocket();
 
   const editor = useEditor({
     extensions: [
@@ -38,7 +38,7 @@ export default function Page() {
       TaskItem.configure({ nested: true }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       FontSize,
-      PreserveSpaces,
+      CustomDeleteBackward,
     ],
     editorProps: {
       attributes: {

@@ -21,6 +21,7 @@ import {
   Baseline,
   Highlighter,
   Link2,
+  ExternalLink,
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -201,15 +202,26 @@ function HighlightColorPicker({ editor }: ToolbarProps) {
   );
 }
 
-function LinkOption({ editor }: ToolbarProps) {
+export function LinkOption({ editor }: ToolbarProps) {
   const [url, setUrl] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
+  const formatUrl = (input: string) => {
+    if (!input) return "";
+    return input.startsWith("http://") || input.startsWith("https://") ? input : `https://${input}`;
+  };
+
   const addLink = () => {
     if (!url) return;
+    const formattedUrl = formatUrl(url);
 
-    editor?.chain().focus().extendMarkRange("link").setLink({ href: url, target: "_blank" }).run();
-    editor?.chain().focus().toggleUnderline().run();
+    // Apply the link to the selected text
+    editor
+      ?.chain()
+      .focus()
+      .extendMarkRange("link") // Extend the selection to the entire link (if any)
+      .setLink({ href: formattedUrl, target: "_blank" }) // Set the link
+      .run();
 
     setIsOpen(false);
     setUrl("");
@@ -218,19 +230,27 @@ function LinkOption({ editor }: ToolbarProps) {
   const removeLink = () => {
     editor?.chain().focus().extendMarkRange("link").unsetLink().run();
     setIsOpen(false);
+    setUrl("");
   };
 
   if (!editor) return null;
 
   return (
     <div className="flex gap-1">
-      <DropdownMenu onOpenChange={setIsOpen}>
+      <DropdownMenu
+        onOpenChange={(open) => {
+          if (open) {
+            setIsOpen(true);
+            setUrl(editor?.getAttributes("link").href || "");
+          }
+        }}
+      >
         <DropdownMenuTrigger className={`px-2 py-1 flex items-center justify-between font-medium outline-0 rounded-md cursor-pointer ${isOpen ? "bg-gray-300" : "hover:bg-gray-300"}`}>
           <Link2 size={16} />
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="p-0 rounded-none">
+        <DropdownMenuContent className="p-2 bg-white shadow-md rounded-md w-64">
           <Input type="url" placeholder="Enter link" value={url} onChange={(e) => setUrl(e.target.value)} className="mb-2" />
-          <div className="flex gap-2">
+          <div className="flex justify-between gap-2">
             <button onClick={addLink} disabled={!url}>
               Insert
             </button>
@@ -238,6 +258,11 @@ function LinkOption({ editor }: ToolbarProps) {
               Remove
             </button>
           </div>
+          {url && (
+            <a href={formatUrl(url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 mt-2 text-blue-500 hover:underline">
+              <ExternalLink size={14} /> Go to Link
+            </a>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

@@ -1,5 +1,35 @@
 import { Extension } from "@tiptap/core";
 
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    fontSize: {
+      setFontSize: (size: string) => ReturnType;
+      unsetFontSize: () => ReturnType;
+    };
+    deleteBackward: {
+      deleteBackward: () => void;
+    };
+  }
+}
+
+export const CustomDeleteBackward = Extension.create({
+  addCommands() {
+    return {
+      deleteBackward:
+        () =>
+        ({ tr }) => {
+          const { $from, $to } = tr.selection;
+          const from = tr.mapping.map($from.pos);
+          const to = tr.mapping.map($to.pos);
+          console.log("from", from);
+          console.log("to", to);
+          tr.delete(from, to);
+          return true;
+        },
+    };
+  },
+});
+
 export const PreserveSpaces = Extension.create({
   addKeyboardShortcuts() {
     return {
@@ -10,15 +40,6 @@ export const PreserveSpaces = Extension.create({
     };
   },
 });
-
-declare module "@tiptap/core" {
-  interface Commands<ReturnType> {
-    fontSize: {
-      setFontSize: (size: string) => ReturnType;
-      unsetFontSize: () => ReturnType;
-    };
-  }
-}
 
 export const FontSize = Extension.create({
   name: "fontSize",
