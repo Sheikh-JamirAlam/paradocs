@@ -25,8 +25,9 @@ import {
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import Chrome from "@uiw/react-color-chrome";
+const Chrome = dynamic(() => import("@uiw/react-color-chrome"), { ssr: false });
 import { GithubPlacement } from "@uiw/react-color-github";
+import dynamic from "next/dynamic";
 
 interface ToolbarProps {
   editor: Editor | null;
@@ -214,15 +215,7 @@ export function LinkOption({ editor }: ToolbarProps) {
   const addLink = () => {
     if (!url) return;
     const formattedUrl = formatUrl(url);
-
-    // Apply the link to the selected text
-    editor
-      ?.chain()
-      .focus()
-      .extendMarkRange("link") // Extend the selection to the entire link (if any)
-      .setLink({ href: formattedUrl, target: "_blank" }) // Set the link
-      .run();
-
+    editor?.chain().focus().extendMarkRange("link").setLink({ href: formattedUrl, target: "_blank" }).run();
     setIsOpen(false);
     setUrl("");
   };
@@ -244,21 +237,30 @@ export function LinkOption({ editor }: ToolbarProps) {
             setUrl(editor?.getAttributes("link").href || "");
           }
         }}
+        open={isOpen}
       >
         <DropdownMenuTrigger className={`px-2 py-1 flex items-center justify-between font-medium outline-0 rounded-md cursor-pointer ${isOpen ? "bg-gray-300" : "hover:bg-gray-300"}`}>
           <Link2 size={16} />
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="p-2 bg-white shadow-md rounded-md w-64">
+        <DropdownMenuContent className="p-2 bg-white shadow-md rounded-md w-64" onPointerDownOutside={() => setIsOpen(false)}>
           <Input type="url" placeholder="Enter link" value={url} onChange={(e) => setUrl(e.target.value)} className="mb-2" />
-          <div className="flex justify-between gap-2">
-            <button onClick={addLink} disabled={!url}>
+          <div className="flex justify-end gap-1">
+            <button
+              onClick={addLink}
+              disabled={!url}
+              className={`px-4 py-1 bg-transparent hover:bg-lime-200 transition-colors font-medium cursor-pointer ${!url ? "text-gray-400" : "text-lime-700"} rounded-full`}
+            >
               Insert
             </button>
-            <button onClick={removeLink} disabled={!editor.isActive("link")}>
+            <button
+              onClick={removeLink}
+              disabled={!editor.isActive("link")}
+              className={`px-4 py-1 bg-transparent hover:bg-red-100 transition-colors font-medium cursor-pointer ${!editor.isActive("link") ? "text-gray-400" : "text-red-800"} rounded-full`}
+            >
               Remove
             </button>
           </div>
-          {url && (
+          {editor.isActive("link") && (
             <a href={formatUrl(url)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 mt-2 text-blue-500 hover:underline">
               <ExternalLink size={14} /> Go to Link
             </a>

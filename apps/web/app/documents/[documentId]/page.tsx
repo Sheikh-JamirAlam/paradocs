@@ -15,7 +15,7 @@ import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
 import useSocket from "../../components/SocketHook";
 import Toolbar from "../../components/Document/Toolbar";
-import { PreserveSpaces, FontSize, CustomDeleteBackward } from "../../lib/extensions/tiptap";
+import { PreserveSpaces, FontSize } from "../../lib/extensions/tiptap";
 
 export default function Page() {
   // const { documentId } = useParams();
@@ -38,7 +38,6 @@ export default function Page() {
       TaskItem.configure({ nested: true }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       FontSize,
-      CustomDeleteBackward,
     ],
     editorProps: {
       attributes: {
