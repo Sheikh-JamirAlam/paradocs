@@ -401,7 +401,7 @@ export default function Toolbar({ editor }: ToolbarProps) {
   if (!editor) return null;
 
   return (
-    <div className="mt-4 px-4 py-1 flex items-center bg-slate-200 rounded-full">
+    <div className="px-4 py-1 flex items-center bg-slate-200 rounded-full">
       <div className="flex gap-1">
         <button onClick={() => editor.chain().focus().undo().run()} className="p-2 rounded-md cursor-pointer hover:bg-gray-300">
           <Undo2 size={16} />
