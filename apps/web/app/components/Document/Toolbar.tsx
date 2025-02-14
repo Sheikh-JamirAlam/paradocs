@@ -28,7 +28,6 @@ import {
   RemoveFormatting,
   Strikethrough,
   Printer,
-  SpellCheck,
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
