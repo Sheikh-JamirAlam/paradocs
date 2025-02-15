@@ -2,9 +2,13 @@
 
 import { useRef, useEffect, useState } from "react";
 import { Editor } from "@tiptap/react";
+import { Document, Packer, Paragraph } from "docx";
 import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, MenubarShortcut, MenubarSub, MenubarSubContent, MenubarSubTrigger, MenubarTrigger } from "@/components/ui/menubar";
-import { Text, File, FileJson, FilePlus, FileText, Globe, Printer, Redo2, Undo2, Bold, Strikethrough, Italic, Underline, RemoveFormatting, Image } from "lucide-react";
-import { CloudDone, PdfFile } from "../Icons";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Text, File, FilePlus, Printer, Redo2, Undo2, Bold, Strikethrough, Italic, Underline, RemoveFormatting, Image, UploadIcon, SearchIcon, Table } from "lucide-react";
+import { CloudDone, FiletypeDocx, FiletypeHtml, FiletypePdf, FiletypeTxt } from "../Icons";
 
 interface ToolbarProps {
   editor: Editor | null;
@@ -13,6 +17,11 @@ interface ToolbarProps {
 export default function MenubarNav({ editor }: ToolbarProps) {
   const [docName, setDocName] = useState("Document Name");
   const [inputWidth, setInputWidth] = useState(108);
+  const [isTableDialogOpen, setIsTableDialogOpen] = useState(false);
+  const [rows, setRows] = useState(1);
+  const [cols, setCols] = useState(1);
+  const [isImageUrlDialogOpen, setIsImageUrlDialogOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
   const spanRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
@@ -21,6 +30,75 @@ export default function MenubarNav({ editor }: ToolbarProps) {
       setInputWidth(width);
     }
   }, [docName]);
+
+  const downloadFile = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const anchorElement = document.createElement("a");
+    anchorElement.href = url;
+    anchorElement.download = filename;
+    anchorElement.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const saveAsDocx = () => {
+    if (!editor) return;
+    const content = editor.getText();
+    const doc = new Document({
+      sections: [
+        {
+          children: [new Paragraph(content)],
+        },
+      ],
+    });
+    Packer.toBlob(doc).then((blob) => downloadFile(blob, "document.docx"));
+  };
+
+  const saveAsHtml = () => {
+    if (!editor) return;
+    const content = editor.getHTML();
+    const blob = new Blob([content], { type: "text/html" });
+    downloadFile(blob, `${docName || "document"}.html`);
+  };
+
+  const saveAsTxt = () => {
+    if (!editor) return;
+    const content = editor.getText();
+    const blob = new Blob([content], { type: "text/plain" });
+    downloadFile(blob, `${docName || "document"}.txt`);
+  };
+
+  const createTable = () => {
+    if (!editor) return;
+    editor.chain().focus().insertTable({ rows, cols }).run();
+    setIsTableDialogOpen(false);
+  };
+
+  const onChange = (src: string) => {
+    editor?.chain().focus().setImage({ src }).run();
+  };
+
+  const uploadImage = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const imageUrl = URL.createObjectURL(file);
+        onChange(imageUrl);
+      }
+    };
+    input.click();
+  };
+
+  const handleUrlSubmit = () => {
+    if (imageUrl) {
+      onChange(imageUrl);
+      setImageUrl("");
+      setIsImageUrlDialogOpen(false);
+    }
+  };
 
   return (
     <nav className="w-full px-4 py-2 flex gap-2">
@@ -43,20 +121,20 @@ export default function MenubarNav({ editor }: ToolbarProps) {
                     <File className="size-4 mr-2 text-black" /> Save
                   </MenubarSubTrigger>
                   <MenubarSubContent>
-                    <MenubarItem className="cursor-pointer">
-                      <FileJson className="size-4 mr-2 text-black" />
-                      JSON
+                    <MenubarItem className="cursor-pointer" onClick={saveAsDocx}>
+                      <FiletypeDocx className="size-4 mr-2 text-black" />
+                      DOCX
                     </MenubarItem>
-                    <MenubarItem className="cursor-pointer">
-                      <Globe className="size-4 mr-2 text-black" />
+                    <MenubarItem className="cursor-pointer" onClick={saveAsHtml}>
+                      <FiletypeHtml className="size-4 mr-2 text-black" />
                       HTML
                     </MenubarItem>
                     <MenubarItem className="cursor-pointer" onClick={() => window.print()}>
-                      <PdfFile className="size-4 mr-2 text-black" />
+                      <FiletypePdf className="size-4 mr-2 text-black" />
                       PDF
                     </MenubarItem>
-                    <MenubarItem className="cursor-pointer">
-                      <FileText className="size-4 mr-2 text-black" />
+                    <MenubarItem className="cursor-pointer" onClick={saveAsTxt}>
+                      <FiletypeTxt className="size-4 mr-2 text-black" />
                       Text
                     </MenubarItem>
                   </MenubarSubContent>
@@ -90,23 +168,85 @@ export default function MenubarNav({ editor }: ToolbarProps) {
               <MenubarContent>
                 <MenubarSub>
                   <MenubarSubTrigger className="cursor-pointer">
-                    <Image className="size-4 mr-2 text-black" /> Image
+                    <Image className="size-4 mr-2" /> Image
                   </MenubarSubTrigger>
                   <MenubarSubContent>
-                    <MenubarItem className="cursor-pointer">Table</MenubarItem>
+                    <MenubarItem className="cursor-pointer" onClick={uploadImage}>
+                      <UploadIcon size={16} className="text-black" />
+                      Upload from computer
+                    </MenubarItem>
+                    <MenubarItem className="cursor-pointer" onClick={() => setIsImageUrlDialogOpen(true)}>
+                      <SearchIcon size={16} className="text-black" />
+                      Image url from web
+                    </MenubarItem>
                   </MenubarSubContent>
                 </MenubarSub>
-                <MenubarSub>
-                  <MenubarSubTrigger className="cursor-pointer">Table</MenubarSubTrigger>
-                  <MenubarSubContent>
-                    {/* <MenubarItem onClick={() => insertTable({ rows: 1, cols: 1 })}>1 x 1</MenubarItem>
-                    <MenubarItem onClick={() => insertTable({ rows: 2, cols: 2 })}>2 x 2</MenubarItem>
-                    <MenubarItem onClick={() => insertTable({ rows: 4, cols: 4 })}>4 x 4</MenubarItem>
-                    <MenubarItem onClick={() => insertTable({ rows: 4, cols: 6 })}>4 x 6</MenubarItem> */}
-                  </MenubarSubContent>
-                </MenubarSub>
+                <MenubarItem className="cursor-pointer" onClick={() => setIsTableDialogOpen(true)}>
+                  <Table className="size-4 mr-2 text-black" />
+                  Table
+                </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
+            <Dialog open={isTableDialogOpen} onOpenChange={setIsTableDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Insert table</DialogTitle>
+                </DialogHeader>
+                <Label htmlFor="rows">Rows</Label>
+                <Input
+                  id="rows"
+                  placeholder="Rows"
+                  type="number"
+                  value={rows}
+                  onChange={(e) => setRows(parseInt(e.target.value) || 0)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      createTable();
+                    }
+                  }}
+                />
+                <Label htmlFor="cols">Columns</Label>
+                <Input
+                  id="cols"
+                  placeholder="Columns"
+                  type="number"
+                  value={cols}
+                  onChange={(e) => setCols(parseInt(e.target.value) || 0)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      createTable();
+                    }
+                  }}
+                />
+                <DialogFooter>
+                  <button onClick={createTable} className="px-4 py-1 bg-transparent hover:bg-lime-200 transition-colors font-medium cursor-pointer rounded-full">
+                    Insert
+                  </button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+            <Dialog open={isImageUrlDialogOpen} onOpenChange={setIsImageUrlDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Insert image URL</DialogTitle>
+                </DialogHeader>
+                <Input
+                  placeholder="Insert image URL"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      handleUrlSubmit();
+                    }
+                  }}
+                />
+                <DialogFooter>
+                  <button onClick={handleUrlSubmit} className="px-4 py-1 bg-transparent hover:bg-lime-200 transition-colors font-medium cursor-pointer rounded-full">
+                    Insert
+                  </button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
             <MenubarMenu>
               <MenubarTrigger className="text-sm font-normal py-0.5 px-2 rounded-sm hover:bg-gray-200 cursor-pointer">Format</MenubarTrigger>
               <MenubarContent>

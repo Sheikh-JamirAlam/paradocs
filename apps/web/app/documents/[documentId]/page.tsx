@@ -15,6 +15,10 @@ import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import ImageResize from "tiptap-extension-resize-image";
+import Table from "@tiptap/extension-table";
+import TableCell from "@tiptap/extension-table-cell";
+import TableHeader from "@tiptap/extension-table-header";
+import TableRow from "@tiptap/extension-table-row";
 import useSocket from "@/app/components/SocketHook";
 import Menubar from "@/app/components/Document/MenubarNav";
 import Toolbar from "@/app/components/Document/Toolbar";
@@ -33,6 +37,10 @@ export default function Page() {
       Color,
       Image,
       ImageResize,
+      Table,
+      TableCell,
+      TableHeader,
+      TableRow,
       Highlight.configure({ multicolor: true }),
       Link.configure({
         openOnClick: false,

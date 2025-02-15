@@ -321,11 +321,11 @@ function ImageOption({ editor }: ToolbarProps) {
         <DropdownMenuContent>
           <DropdownMenuItem onClick={onUpload} className="px-2 py-2 cursor-pointer">
             <UploadIcon size={16} className="text-black" />
-            Upload
+            Upload from computer
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsImageUrlDialogOpen(true)} className="px-2 py-2 cursor-pointer">
             <SearchIcon size={16} className="text-black" />
-            Paste image url
+            Image url from web
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
