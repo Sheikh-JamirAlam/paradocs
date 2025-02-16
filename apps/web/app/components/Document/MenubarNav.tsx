@@ -8,9 +8,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Text, File, FilePlus, Printer, Redo2, Undo2, Bold, Strikethrough, Italic, Underline, RemoveFormatting, Image, UploadIcon, SearchIcon, Table } from "lucide-react";
+import { Text, File, FilePlus, Printer, Redo2, Undo2, Bold, Strikethrough, Italic, Underline, RemoveFormatting, Image, UploadIcon, SearchIcon, Table, User, Users } from "lucide-react";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
 import { CloudDone, FiletypeDocx, FiletypeHtml, FiletypePdf, FiletypeTxt } from "@repo/ui/icons";
+import ShareDialog from "./ShareDialog";
+import { useParams } from "next/navigation";
 
 interface UserProps {
   id: string;
@@ -20,6 +22,7 @@ interface UserProps {
 }
 
 export default function MenubarNav({ editor, user, title }: { editor: Editor | null; user: UserProps | null; title: string }) {
+  const { documentId } = useParams();
   const [docName, setDocName] = useState(title);
   const [inputWidth, setInputWidth] = useState(108);
   const [isTableDialogOpen, setIsTableDialogOpen] = useState(false);
@@ -28,6 +31,7 @@ export default function MenubarNav({ editor, user, title }: { editor: Editor | n
   const [isImageUrlDialogOpen, setIsImageUrlDialogOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const spanRef = useRef<HTMLSpanElement>(null);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 
   useEffect(() => {
     setDocName(title);
@@ -295,6 +299,11 @@ export default function MenubarNav({ editor, user, title }: { editor: Editor | n
         </div>
       </div>
       <div className="flex gap-2 items-center">
+        <div onClick={() => setIsShareDialogOpen(true)} className="px-6 py-2 font-medium bg-lime-200 hover:bg-lime-300 transition-colors rounded-full flex items-center gap-2 cursor-pointer">
+          <Users className="size-4" />
+          Share
+        </div>
+        <ShareDialog documentId={documentId} isOpen={isShareDialogOpen} onClose={() => setIsShareDialogOpen(false)} onCollaboratorAdded={() => {}} />
         <Popover>
           <PopoverTrigger className="rounded-full border-4 border-transparent hover:border-gray-200 transition-all outline-none cursor-pointer">
             <div className="w-8 h-8 text-lg font-medium bg-green-500 text-white rounded-full flex items-center justify-center">{`${user?.name
@@ -303,18 +312,10 @@ export default function MenubarNav({ editor, user, title }: { editor: Editor | n
               .join("")
               .slice(0, 2)}`}</div>
           </PopoverTrigger>
-          <PopoverContent className="w-40 p-1 -translate-x-4">
+          <PopoverContent className="w-24 p-1 -translate-x-4">
             <div className="grid">
-              <div className="p-2">
-                <h4 className="font-medium leading-none">Account</h4>
-              </div>
-              <div className="grid">
-                <div className="px-2 py-1 hover:bg-gray-100 rounded-sm cursor-pointer">
-                  <p>Teams</p>
-                </div>
-                <div className="px-2 py-1 hover:bg-gray-100 rounded-sm cursor-pointer">
-                  <LogoutLink>Log out</LogoutLink>
-                </div>
+              <div className="px-2 py-1 hover:bg-gray-100 rounded-sm cursor-pointer">
+                <LogoutLink>Log out</LogoutLink>
               </div>
             </div>
           </PopoverContent>
