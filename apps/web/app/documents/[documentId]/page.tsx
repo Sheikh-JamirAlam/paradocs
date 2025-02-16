@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { BACKEND_URL } from "@/app/lib/constants/urls";
 import { getSession } from "@/app/server/actions/sessions";
@@ -28,6 +28,7 @@ import Toolbar from "@/app/components/Document/Toolbar";
 import { FontSize, PreserveSpaces } from "@/app/lib/extensions/tiptap";
 import { useAuth } from "@/app/hooks/useAuth";
 import Loader from "@/app/components/Document/Loader";
+import { debounce } from "lodash";
 
 export default function Page() {
   const { documentId } = useParams();
@@ -53,6 +54,29 @@ export default function Page() {
       fetchDocument();
     }
   }, [documentId]);
+
+  const saveContent = async (content: string) => {
+    try {
+      const session = await getSession();
+      await axios.patch(
+        `${BACKEND_URL}/documents/${documentId}`,
+        { content },
+        {
+          headers: {
+            Authorization: `Bearer ${session}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Failed to save document:", error);
+    }
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSave = useCallback(
+    debounce((content: string) => saveContent(content), 1000),
+    [documentId]
+  );
 
   const editor = useEditor({
     extensions: [
@@ -90,6 +114,7 @@ export default function Page() {
     onUpdate: ({ editor }) => {
       const newContent = editor.getHTML();
       updateContent(newContent);
+      debouncedSave(newContent);
     },
   });
 
