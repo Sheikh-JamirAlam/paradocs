@@ -72,11 +72,11 @@ export default function Page() {
 
   return (
     <div className="size-full overflow-x-auto bg-gray-100 px-4 print:p-0 print:bg-white print:overflow-visible">
-      <div className="print:hidden">
+      <div className="px-4 fixed top-0 left-0 right-0 z-10 print:hidden">
         <Menubar editor={editor} />
         <Toolbar editor={editor} />
       </div>
-      <div className="min-w-max flex justify-center w-[816px] py-4 print:py-0 mx-auto print:w-full print:min-w-0 font-[Arial]">
+      <div className="min-w-max flex justify-center w-[816px] py-4 pt-32 print:py-0 mx-auto print:w-full print:min-w-0 font-[Arial]">
         <EditorContent editor={editor} />
       </div>
     </div>

@@ -8,8 +8,7 @@ import { getSession } from "../server/actions/sessions";
 interface User {
   id: string;
   kindeId: string;
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
 }
 
