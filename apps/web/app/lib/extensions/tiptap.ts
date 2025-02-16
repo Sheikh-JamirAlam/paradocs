@@ -16,6 +16,13 @@ export const PreserveSpaces = Extension.create({
         editor.commands.insertContent("\u00A0");
         return true;
       },
+      Tab: ({ editor }) => {
+        if (this.options.preserveTabs) {
+          editor.commands.insertContent("\u00A0\u00A0\u00A0\u00A0");
+          return true;
+        }
+        return false;
+      },
     };
   },
 });

@@ -25,7 +25,7 @@ import TableRow from "@tiptap/extension-table-row";
 import useSocket from "@/app/hooks/SocketHook";
 import MenubarNav from "@/app/components/Document/MenubarNav";
 import Toolbar from "@/app/components/Document/Toolbar";
-import { FontSize } from "@/app/lib/extensions/tiptap";
+import { FontSize, PreserveSpaces } from "@/app/lib/extensions/tiptap";
 import { useAuth } from "@/app/hooks/useAuth";
 import Loader from "@/app/components/Document/Loader";
 
@@ -77,6 +77,7 @@ export default function Page() {
       TaskItem.configure({ nested: true }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       FontSize,
+      PreserveSpaces,
     ],
     content: document?.content || "",
     editorProps: {
