@@ -19,8 +19,8 @@ interface UserProps {
   email: string;
 }
 
-export default function MenubarNav({ editor, user }: { editor: Editor | null; user: UserProps | null }) {
-  const [docName, setDocName] = useState("Document Name");
+export default function MenubarNav({ editor, user, title }: { editor: Editor | null; user: UserProps | null; title: string }) {
+  const [docName, setDocName] = useState(title);
   const [inputWidth, setInputWidth] = useState(108);
   const [isTableDialogOpen, setIsTableDialogOpen] = useState(false);
   const [rows, setRows] = useState(1);
@@ -28,6 +28,10 @@ export default function MenubarNav({ editor, user }: { editor: Editor | null; us
   const [isImageUrlDialogOpen, setIsImageUrlDialogOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
   const spanRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    setDocName(title);
+  }, [title]);
 
   useEffect(() => {
     if (spanRef.current) {

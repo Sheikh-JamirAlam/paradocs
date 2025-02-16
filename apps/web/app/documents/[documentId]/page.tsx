@@ -1,5 +1,10 @@
 "use client";
 
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { BACKEND_URL } from "@/app/lib/constants/urls";
+import { getSession } from "@/app/server/actions/sessions";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -25,8 +30,29 @@ import { useAuth } from "@/app/hooks/useAuth";
 import Loader from "@/app/components/Document/Loader";
 
 export default function Page() {
-  // const { documentId } = useParams();
+  const { documentId } = useParams();
   const { user, isLoading } = useAuth();
+  const [document, setDocument] = useState<{ title: string; content: string } | null>(null);
+
+  useEffect(() => {
+    const fetchDocument = async () => {
+      try {
+        const session = await getSession();
+        const response = await axios.get(`${BACKEND_URL}/documents/${documentId}`, {
+          headers: {
+            Authorization: `Bearer ${session}`,
+          },
+        });
+        setDocument(response.data.document);
+      } catch (error) {
+        console.error("Failed to fetch document:", error);
+      }
+    };
+
+    if (documentId) {
+      fetchDocument();
+    }
+  }, [documentId]);
 
   const editor = useEditor({
     extensions: [
@@ -52,6 +78,7 @@ export default function Page() {
       TextAlign.configure({ types: ["heading", "paragraph"] }),
       FontSize,
     ],
+    content: document?.content || "",
     editorProps: {
       attributes: {
         style: `padding-left: 51px; padding-right: 51px;`,
@@ -65,14 +92,21 @@ export default function Page() {
     },
   });
 
+  useEffect(() => {
+    if (document?.content && editor) {
+      editor.commands.setContent(document.content);
+    }
+    console.log(document?.title);
+  }, [document, editor]);
+
   const { updateContent } = useSocket(editor);
 
-  if (isLoading) return <Loader />;
+  if (isLoading && !document) return <Loader />;
 
   return (
     <div className="size-full overflow-x-auto bg-gray-100 px-4 print:p-0 print:bg-white print:overflow-visible">
       <div className="px-4 py-1 bg-gray-100 fixed top-0 left-0 right-0 z-10 print:hidden">
-        <MenubarNav editor={editor} user={user} />
+        <MenubarNav editor={editor} user={user} title={document?.title || "Untitled Document"} />
         <Toolbar editor={editor} />
       </div>
       <div className="min-w-max flex justify-center w-[816px] py-4 pt-32 print:py-0 mx-auto print:w-full print:min-w-0 font-[Arial]">
