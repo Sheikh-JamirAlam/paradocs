@@ -1,4 +1,4 @@
-import { SpinnerClock } from "../Icons";
+import { SpinnerClock } from "@repo/ui/icons";
 
 export default function Loader() {
   return (

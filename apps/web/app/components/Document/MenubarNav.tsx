@@ -9,7 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Text, File, FilePlus, Printer, Redo2, Undo2, Bold, Strikethrough, Italic, Underline, RemoveFormatting, Image, UploadIcon, SearchIcon, Table } from "lucide-react";
-import { CloudDone, FiletypeDocx, FiletypeHtml, FiletypePdf, FiletypeTxt } from "../Icons";
+import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs/components";
+import { CloudDone, FiletypeDocx, FiletypeHtml, FiletypePdf, FiletypeTxt } from "@repo/ui/icons";
 
 interface UserProps {
   id: string;
@@ -308,7 +309,7 @@ export default function MenubarNav({ editor, user }: { editor: Editor | null; us
                   <p>Teams</p>
                 </div>
                 <div className="px-2 py-1 hover:bg-gray-100 rounded-sm cursor-pointer">
-                  <p>Log out</p>
+                  <LogoutLink>Log out</LogoutLink>
                 </div>
               </div>
             </div>

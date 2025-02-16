@@ -3,7 +3,7 @@ import { verifyToken } from "../utils/jwt.service";
 import { getUserById } from "../services/getUserById";
 
 interface AuthRequest extends Request {
-  user?: any;
+  user?: { id: string; email: string; name: string | null };
 }
 
 export const JWTMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
