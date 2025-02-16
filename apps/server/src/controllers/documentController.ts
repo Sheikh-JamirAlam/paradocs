@@ -28,10 +28,10 @@ export const getDocumentController = async (req: AuthRequest, res: Response): Pr
       res.status(401).json({ error: "User not authenticated" });
       return;
     }
-
+    const { id } = req.user;
     const { documentId } = req.params;
 
-    const document = await getDocumentById(documentId);
+    const document = await getDocumentById(documentId, id);
 
     res.status(200).json({ message: "Document was found", document });
   } catch (error) {
