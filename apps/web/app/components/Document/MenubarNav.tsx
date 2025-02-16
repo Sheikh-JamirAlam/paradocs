@@ -7,17 +7,18 @@ import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, Me
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Text, File, FilePlus, Printer, Redo2, Undo2, Bold, Strikethrough, Italic, Underline, RemoveFormatting, Image, UploadIcon, SearchIcon, Table } from "lucide-react";
 import { CloudDone, FiletypeDocx, FiletypeHtml, FiletypePdf, FiletypeTxt } from "../Icons";
-import { useAuth } from "@/app/hooks/useAuth";
 
-interface ToolbarProps {
-  editor: Editor | null;
+interface UserProps {
+  id: string;
+  kindeId: string;
+  name: string;
+  email: string;
 }
 
-export default function MenubarNav({ editor }: ToolbarProps) {
-  const { user, isLoading } = useAuth();
+export default function MenubarNav({ editor, user }: { editor: Editor | null; user: UserProps | null }) {
   const [docName, setDocName] = useState("Document Name");
   const [inputWidth, setInputWidth] = useState(108);
   const [isTableDialogOpen, setIsTableDialogOpen] = useState(false);
@@ -103,10 +104,8 @@ export default function MenubarNav({ editor }: ToolbarProps) {
     }
   };
 
-  if (isLoading) return <div></div>;
-
   return (
-    <nav className="w-full px-4 py-2 flex justify-between items-center">
+    <nav className="w-full px-4 pb-2 flex justify-between items-center">
       <div className="flex gap-2 items-center">
         <div className="text-4xl font-semibold font-serif underline">Paradocs</div>
         <div className="flex flex-col">
@@ -290,20 +289,31 @@ export default function MenubarNav({ editor }: ToolbarProps) {
           </div>
         </div>
       </div>
-      <div>
-        <DropdownMenu>
-          <DropdownMenuTrigger className="rounded-full border-4 border-transparent hover:border-gray-200 transition-all outline-none cursor-pointer">
+      <div className="flex gap-2 items-center">
+        <Popover>
+          <PopoverTrigger className="rounded-full border-4 border-transparent hover:border-gray-200 transition-all outline-none cursor-pointer">
             <div className="w-8 h-8 text-lg font-medium bg-green-500 text-white rounded-full flex items-center justify-center">{`${user?.name
               .split(" ")
               .map((part) => part[0])
               .join("")
               .slice(0, 2)}`}</div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>Team</DropdownMenuItem>
-            <DropdownMenuItem>Log Out</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </PopoverTrigger>
+          <PopoverContent className="w-40 p-1 -translate-x-4">
+            <div className="grid">
+              <div className="p-2">
+                <h4 className="font-medium leading-none">Account</h4>
+              </div>
+              <div className="grid">
+                <div className="px-2 py-1 hover:bg-gray-100 rounded-sm cursor-pointer">
+                  <p>Teams</p>
+                </div>
+                <div className="px-2 py-1 hover:bg-gray-100 rounded-sm cursor-pointer">
+                  <p>Log out</p>
+                </div>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
     </nav>
   );

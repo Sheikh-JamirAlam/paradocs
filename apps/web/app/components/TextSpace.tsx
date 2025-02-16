@@ -1,6 +1,6 @@
 "use client";
 
-import useSocket from "./SocketHook";
+import useSocket from "../hooks/SocketHook";
 
 export default function TextSpace() {
   const { content, updateContent } = useSocket();

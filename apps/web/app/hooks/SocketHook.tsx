@@ -1,20 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Editor } from "@tiptap/react";
 
-export default function useSocket() {
+export default function useSocket(editor: Editor | null) {
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const [content, setContent] = useState<string>("");
 
   useEffect(() => {
     const socket = new WebSocket(`ws://localhost:8080`);
+
     socket.onopen = () => {
-      console.log("Connected to server");
+      console.log("Connected to WebSocket server");
       setSocket(socket);
     };
+
     socket.onmessage = (message) => {
-      setContent(message.data);
+      if (editor) {
+        const content = JSON.parse(message.data);
+        editor.commands.setContent(content);
+      }
     };
+
     socket.onclose = () => {
       console.log("Disconnected from WebSocket server");
     };
@@ -22,14 +28,13 @@ export default function useSocket() {
     return () => {
       socket.close();
     };
-  }, []);
+  }, [editor]);
 
-  const updateContent = (message: string) => {
-    setContent(message);
+  const updateContent = (content: string) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
-      socket.send(message);
+      socket.send(JSON.stringify(content));
     }
   };
 
-  return { content, updateContent };
+  return { updateContent };
 }
