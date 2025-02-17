@@ -1,0 +1,3 @@
+const ENV_KINDE_ISSUER = process.env.NEXT_PUBLIC_ISSUER_URL;
+
+export const KINDE_ISSUER = ENV_KINDE_ISSUER;

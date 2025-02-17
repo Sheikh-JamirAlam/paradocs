@@ -21,6 +21,10 @@ export function useAuth() {
     const fetchUser = async () => {
       try {
         const session = await getSession();
+        if (!session || session === "") {
+          setIsLoading(false);
+          return;
+        }
         const response = await axios.get(`${BACKEND_URL}/auth/me`, {
           headers: {
             Authorization: `Bearer ${session}`,
