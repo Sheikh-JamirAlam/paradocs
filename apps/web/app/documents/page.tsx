@@ -1,5 +1,6 @@
 import Navbar from "../components/Navbar";
 import CreateDocument from "../components/Document/CreateDocument";
+import DocumentsTable from "../components/Document/DocumentsTable";
 
 export default function Page() {
   return (
@@ -12,6 +13,7 @@ export default function Page() {
             <CreateDocument />
           </div>
         </section>
+        <DocumentsTable />
       </main>
       <footer className=""></footer>
     </div>

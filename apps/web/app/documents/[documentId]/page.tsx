@@ -1,5 +1,6 @@
 "use client";
 
+import NextLink from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import axios from "axios";
@@ -34,6 +35,7 @@ export default function Page() {
   const { documentId } = useParams();
   const { user, isLoading } = useAuth();
   const [document, setDocument] = useState<{ title: string; content: string } | null>(null);
+  const [isDocumentAccessible, setIsDocumentAccessible] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchDocument = async () => {
@@ -44,6 +46,9 @@ export default function Page() {
             Authorization: `Bearer ${session}`,
           },
         });
+        if (response.data.document.error) {
+          setIsDocumentAccessible(false);
+        } else setIsDocumentAccessible(true);
         setDocument(response.data.document);
       } catch (error) {
         console.error("Failed to fetch document:", error);
@@ -122,12 +127,22 @@ export default function Page() {
     if (document?.content && editor) {
       editor.commands.setContent(document.content);
     }
-    console.log(document?.title);
   }, [document, editor]);
 
   const { updateContent } = useSocket(editor);
 
-  if (isLoading && !document) return <Loader />;
+  if (isLoading || !document) return <Loader />;
+
+  if (!isDocumentAccessible) {
+    return (
+      <div className="flex flex-col gap-4 items-center justify-center h-screen">
+        <h1 className="text-2xl font-bold">Document Not Found</h1>
+        <NextLink href="/" className="px-4 py-2 bg-lime-500 hover:bg-lime-700 transition-colors text-white rounded-md cursor-pointer">
+          Return Home
+        </NextLink>
+      </div>
+    );
+  }
 
   return (
     <div className="size-full overflow-x-auto bg-gray-100 px-4 print:p-0 print:bg-white print:overflow-visible">
