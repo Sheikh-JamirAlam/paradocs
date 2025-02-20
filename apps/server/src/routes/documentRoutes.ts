@@ -1,11 +1,12 @@
 import express from "express";
 import { JWTMiddleware } from "../middlewares/authMiddleware";
-import { addDocumentController, getDocumentController, updateDocumentController } from "../controllers/documentController";
+import { addDocumentController, getAllDocumentsController, getDocumentController, updateDocumentController } from "../controllers/documentController";
 import { addCollaboratorController, getCollaboratorsController, removeCollaboratorController } from "../controllers/collaborationController";
 
 const router = express.Router();
 
 router.post("/add", JWTMiddleware, addDocumentController);
+router.get("/getalluserdocs", JWTMiddleware, getAllDocumentsController);
 router.get("/:documentId", JWTMiddleware, getDocumentController);
 router.patch("/:documentId", JWTMiddleware, updateDocumentController);
 
