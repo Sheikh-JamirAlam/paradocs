@@ -1,8 +1,8 @@
 import prisma from "../config/db";
 
-export const getDocumentById = async (documentId: string, userId: string) => {
+export const updateDocumentName = async (documentId: string, userId: string, title: string) => {
   try {
-    const document = await prisma.document.findUnique({
+    const document = await prisma.document.update({
       where: {
         id: documentId,
         OR: [
@@ -16,13 +16,10 @@ export const getDocumentById = async (documentId: string, userId: string) => {
           },
         ],
       },
-      select: { id: true, title: true, content: true },
+      data: { title: title },
     });
-    if (!document) {
-      return { error: "Document does not exist for user" };
-    }
     return document;
   } catch (error) {
-    throw new Error("Database error: " + error);
+    throw new Error("Failed to update document: " + error);
   }
 };

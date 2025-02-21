@@ -5,7 +5,7 @@ import axios from "axios";
 import { BACKEND_URL } from "@/app/lib/constants/urls";
 import { getSession } from "@/app/server/actions/sessions";
 import { EllipsisVerticalIcon } from "lucide-react";
-import Loader from "./Loader";
+import { SpinnerClock } from "@repo/ui/icons";
 
 interface Document {
   id: string;
@@ -51,23 +51,38 @@ export default function DocumentsTable() {
     fetchDocuments();
   }, []);
 
-  if (isLoading) return <Loader />;
+  if (isLoading)
+    return (
+      <div className="h-64 flex justify-center items-center">
+        <SpinnerClock className="text-gray-500 text-4xl" />
+      </div>
+    );
 
   return (
     <section className="px-56 py-5">
-      <div className="h-10 flex items-center justify-between font-semibold border-b border-gray-200 text-gray-500">
+      <div className="h-10 px-2 flex items-center justify-between font-semibold border-b border-gray-200 text-gray-500">
         <div className="w-[40rem]">Name</div>
         <div className="w-[15rem]">Owned by</div>
-        <div className="w-[15rem]">Created at</div>
+        <div className="w-[15rem]">Last updated at</div>
         <div className="w-[5rem]"></div>
       </div>
-      {documents.map((doc) => (
-        <div key={doc.id} className="h-14 flex items-center justify-between border-b border-gray-200 text-gray-500">
+      {documents.map((doc, index) => (
+        <div
+          key={index}
+          onClick={() => (window.location.href = `/documents/${doc.id}`)}
+          className={`h-14 px-2 flex items-center justify-between hover:bg-lime-100 cursor-pointer transition-colors ${index === documents.length - 1 ? "border-b-0" : "border-b"} border-gray-200 text-gray-500`}
+        >
           <div className="w-[40rem]">{doc.title}</div>
           <div className="w-[15rem]">{doc.owner.name}</div>
-          <div className="w-[15rem]">{new Date(doc.updatedAt).toLocaleDateString()}</div>
+          <div className="w-[15rem]">
+            {new Date(doc.updatedAt).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
+          </div>
           <div className="w-[5rem]">
-            <div className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 cursor-pointer transition-colors">
+            <div className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 cursor-pointer transition-colors">
               <EllipsisVerticalIcon className="size-5" />
             </div>
           </div>

@@ -1,6 +1,10 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
+import { useParams } from "next/navigation";
+import Link from "next/link";
+import axios from "axios";
+import { debounce } from "lodash";
 import { Editor } from "@tiptap/react";
 import { Document, Packer, Paragraph } from "docx";
 import { Menubar, MenubarContent, MenubarItem, MenubarMenu, MenubarSeparator, MenubarShortcut, MenubarSub, MenubarSubContent, MenubarSubTrigger, MenubarTrigger } from "@/components/ui/menubar";
@@ -11,8 +15,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Text, File, FilePlus, Printer, Redo2, Undo2, Bold, Strikethrough, Italic, Underline, RemoveFormatting, Image, UploadIcon, SearchIcon, Table, Users } from "lucide-react";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs";
 import { CloudDone, FiletypeDocx, FiletypeHtml, FiletypePdf, FiletypeTxt } from "@repo/ui/icons";
+import { getSession } from "@/app/server/actions/sessions";
 import ShareDialog from "./ShareDialog";
-import { useParams } from "next/navigation";
+import { BACKEND_URL } from "@/app/lib/constants/urls";
 
 interface UserProps {
   id: string;
@@ -43,6 +48,35 @@ export default function MenubarNav({ editor, user, title }: { editor: Editor | n
       setInputWidth(width);
     }
   }, [docName]);
+
+  const saveDocumentName = async (newTitle: string) => {
+    try {
+      const session = await getSession();
+      await axios.patch(
+        `${BACKEND_URL}/documents/${documentId}/title`,
+        { title: newTitle },
+        {
+          headers: {
+            Authorization: `Bearer ${session}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Failed to save document title:", error);
+    }
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSave = useCallback(
+    debounce((newTitle: string) => saveDocumentName(newTitle), 1000),
+    [documentId]
+  );
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTitle = e.target.value;
+    setDocName(newTitle);
+    debouncedSave(newTitle);
+  };
 
   const downloadFile = (blob: Blob, filename: string) => {
     const url = URL.createObjectURL(blob);
@@ -116,13 +150,15 @@ export default function MenubarNav({ editor, user, title }: { editor: Editor | n
   return (
     <nav className="w-full px-4 pb-2 flex justify-between items-center">
       <div className="flex gap-2 items-center">
-        <div className="text-4xl font-semibold font-serif underline">Paradocs</div>
+        <Link href="/" className="text-4xl font-semibold font-serif underline">
+          Paradocs
+        </Link>
         <div className="flex flex-col">
           <div className="font-medium flex items-center gap-1">
             <span ref={spanRef} className="px-2 text-lg invisible absolute whitespace-pre" aria-hidden="true">
               {docName}
             </span>
-            <input className="w-fit px-2 text-lg" onChange={(e) => setDocName(e.target.value)} type="text" value={docName} style={{ width: `${inputWidth}px` }} />
+            <input className="w-fit px-2 text-lg" onChange={handleTitleChange} type="text" value={docName} style={{ width: `${inputWidth}px` }} />
             <CloudDone className="text-lg" />
           </div>
           <div className="flex">
