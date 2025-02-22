@@ -5,7 +5,16 @@ export const updateDocument = async (documentId: string, userId: string, content
     const document = await prisma.document.update({
       where: {
         id: documentId,
-        ownerId: userId,
+        OR: [
+          { ownerId: userId },
+          {
+            collaborators: {
+              some: {
+                userId: userId,
+              },
+            },
+          },
+        ],
       },
       data: { content },
     });

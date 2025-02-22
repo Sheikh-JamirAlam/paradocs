@@ -36,6 +36,7 @@ export default function Page() {
   const { user, isLoading } = useAuth();
   const [document, setDocument] = useState<{ title: string; content: string } | null>(null);
   const [isDocumentAccessible, setIsDocumentAccessible] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchDocument = async () => {
@@ -74,6 +75,8 @@ export default function Page() {
       );
     } catch (error) {
       console.error("Failed to save document:", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -119,6 +122,7 @@ export default function Page() {
     onUpdate: ({ editor }) => {
       const newContent = editor.getHTML();
       updateContent(newContent);
+      setIsSaving(true);
       debouncedSave(newContent);
     },
   });
@@ -147,7 +151,7 @@ export default function Page() {
   return (
     <div className="size-full overflow-x-auto bg-gray-100 px-4 print:p-0 print:bg-white print:overflow-visible">
       <div className="px-4 py-1 bg-gray-100 fixed top-0 left-0 right-0 z-10 print:hidden">
-        <MenubarNav editor={editor} user={user} title={document?.title || "Untitled Document"} />
+        <MenubarNav editor={editor} user={user} title={document?.title || "Untitled Document"} isSaving={isSaving} />
         <Toolbar editor={editor} />
       </div>
       <div className="min-w-max flex justify-center w-[816px] py-4 pt-32 print:py-0 mx-auto print:w-full print:min-w-0 font-[Arial]">

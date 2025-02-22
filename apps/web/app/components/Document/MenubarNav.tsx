@@ -26,7 +26,7 @@ interface UserProps {
   email: string;
 }
 
-export default function MenubarNav({ editor, user, title }: { editor: Editor | null; user: UserProps | null; title: string }) {
+export default function MenubarNav({ editor, user, title, isSaving }: { editor: Editor | null; user: UserProps | null; title: string; isSaving: boolean }) {
   const { documentId } = useParams();
   const [docName, setDocName] = useState(title);
   const [inputWidth, setInputWidth] = useState(108);
@@ -159,7 +159,7 @@ export default function MenubarNav({ editor, user, title }: { editor: Editor | n
               {docName}
             </span>
             <input className="w-fit px-2 text-lg" onChange={handleTitleChange} type="text" value={docName} style={{ width: `${inputWidth}px` }} />
-            <CloudDone className="text-lg" />
+            {isSaving ? <span className="text-gray-500 text-sm">Saving...</span> : <CloudDone className="text-lg" />}
           </div>
           <div className="flex">
             <Menubar className="h-auto p-0 border-none bg-transparent shadow-none">
