@@ -1,6 +1,7 @@
 import Navbar from "../components/Navbar";
 import CreateDocument from "../components/Document/CreateDocument";
 import DocumentsTable from "../components/Document/DocumentsTable";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function Page() {
   return (
@@ -16,6 +17,7 @@ export default function Page() {
         <DocumentsTable />
       </main>
       <footer className=""></footer>
+      <Toaster richColors position="bottom-left" />
     </div>
   );
 }

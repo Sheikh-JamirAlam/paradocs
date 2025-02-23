@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Text, File, FilePlus, Printer, Redo2, Undo2, Bold, Strikethrough, Italic, Underline, RemoveFormatting, Image, UploadIcon, SearchIcon, Table, Users } from "lucide-react";
+import { Text, File, FilePlus, Printer, Redo2, Undo2, Bold, Strikethrough, Italic, Underline, RemoveFormatting, Image, UploadIcon, SearchIcon, Table, Users, RefreshCcw } from "lucide-react";
 import { LogoutLink } from "@kinde-oss/kinde-auth-nextjs";
 import { CloudDone, FiletypeDocx, FiletypeHtml, FiletypePdf, FiletypeTxt } from "@repo/ui/icons";
 import { getSession } from "@/app/server/actions/sessions";
@@ -159,7 +159,14 @@ export default function MenubarNav({ editor, user, title, isSaving }: { editor: 
               {docName}
             </span>
             <input className="w-fit px-2 text-lg" onChange={handleTitleChange} type="text" value={docName} style={{ width: `${inputWidth}px` }} />
-            {isSaving ? <span className="text-gray-500 text-sm">Saving...</span> : <CloudDone className="text-lg" />}
+            {isSaving ? (
+              <span className="flex items-center gap-2 text-gray-500 text-sm">
+                <RefreshCcw className="size-4" />
+                Saving...
+              </span>
+            ) : (
+              <CloudDone className="text-lg" />
+            )}
           </div>
           <div className="flex">
             <Menubar className="h-auto p-0 border-none bg-transparent shadow-none">
