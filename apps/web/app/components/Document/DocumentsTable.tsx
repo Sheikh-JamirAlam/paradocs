@@ -164,7 +164,14 @@ export default function DocumentsTable() {
                   <Trash2Icon size={16} className="text-black" />
                   Remove
                 </DropdownMenuItem>
-                <DropdownMenuItem className="px-2 py-2 rounded-t-none cursor-pointer">
+                <DropdownMenuItem
+                  onSelect={(e) => e.preventDefault()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.open(`/documents/${doc.id}`, "_blank", "noreferrer");
+                  }}
+                  className="px-2 py-2 rounded-t-none cursor-pointer"
+                >
                   <SquareArrowOutUpRightIcon size={16} className="text-black" />
                   Open in new tab
                 </DropdownMenuItem>
