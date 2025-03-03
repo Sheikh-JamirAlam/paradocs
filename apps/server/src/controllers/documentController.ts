@@ -4,6 +4,7 @@ import { getDocumentById } from "../services/getDocumentById";
 import { updateDocument } from "../services/updateDocument";
 import { getAllDocuments } from "../services/getAllDocumentsForUser";
 import { updateDocumentName } from "../services/updateDocumentName";
+import { deleteDocument } from "../services/deleteDocument";
 
 interface AuthRequest extends Request {
   user?: { id: string; email: string; name: string | null };
@@ -20,6 +21,23 @@ export const addDocumentController = async (req: AuthRequest, res: Response): Pr
     const document = await createDocument(id);
 
     res.status(200).json({ message: "Document was created", document });
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const deleteDocumentController = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: "User not authenticated" });
+      return;
+    }
+    const { id } = req.user;
+    const { documentId } = req.params;
+
+    const document = await deleteDocument(documentId, id);
+
+    res.status(200).json({ message: "Document was deleted" });
   } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }

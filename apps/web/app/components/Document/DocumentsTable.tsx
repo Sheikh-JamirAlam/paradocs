@@ -82,6 +82,25 @@ export default function DocumentsTable() {
     fetchDocuments();
   };
 
+  const deleteDocument = async (documentId: string) => {
+    try {
+      const session = await getSession();
+      await axios.delete(`${BACKEND_URL}/documents/${documentId}/delete`, {
+        headers: {
+          Authorization: `Bearer ${session}`,
+        },
+      });
+    } catch (error) {
+      console.error("Document deletion was failed:", error);
+    }
+  };
+
+  const handleDelete = (doc: Document) => {
+    deleteDocument(doc.id);
+    toast.success("Document was deleted");
+    fetchDocuments();
+  };
+
   if (isLoading)
     return (
       <div className="h-64 flex justify-center items-center">
@@ -160,7 +179,14 @@ export default function DocumentsTable() {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
-                <DropdownMenuItem className="px-2 py-2 border-b border-gray-200 rounded-b-none rounded-t-none cursor-pointer">
+                <DropdownMenuItem
+                  onSelect={(e) => e.preventDefault()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(doc);
+                  }}
+                  className="px-2 py-2 border-b border-gray-200 rounded-b-none rounded-t-none cursor-pointer"
+                >
                   <Trash2Icon size={16} className="text-black" />
                   Remove
                 </DropdownMenuItem>
