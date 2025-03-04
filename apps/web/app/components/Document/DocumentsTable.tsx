@@ -35,6 +35,7 @@ export default function DocumentsTable() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRenameOpen, setIsRenameOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [documentName, setDocumentName] = useState("");
 
   const fetchDocuments = async () => {
@@ -95,8 +96,10 @@ export default function DocumentsTable() {
     }
   };
 
-  const handleDelete = (doc: Document) => {
+  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>, doc: Document) => {
+    e.stopPropagation();
     deleteDocument(doc.id);
+    setIsDeleteOpen(false);
     toast.success("Document was deleted");
     fetchDocuments();
   };
@@ -179,17 +182,45 @@ export default function DocumentsTable() {
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
-                <DropdownMenuItem
-                  onSelect={(e) => e.preventDefault()}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(doc);
-                  }}
-                  className="px-2 py-2 border-b border-gray-200 rounded-b-none rounded-t-none cursor-pointer"
-                >
-                  <Trash2Icon size={16} className="text-black" />
-                  Remove
-                </DropdownMenuItem>
+                <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+                  <DialogTrigger className="w-full">
+                    <DropdownMenuItem
+                      onSelect={(e) => e.preventDefault()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDocumentName(doc.title);
+                        setIsDeleteOpen(true);
+                      }}
+                      className="px-2 py-2 border-b border-gray-200 rounded-b-none cursor-pointer"
+                    >
+                      <Trash2Icon size={16} className="text-black" />
+                      Remove
+                    </DropdownMenuItem>
+                  </DialogTrigger>
+                  <DialogContent onClick={(e) => e.stopPropagation()}>
+                    <DialogHeader>
+                      <DialogTitle>Delete</DialogTitle>
+                      <DialogDescription>Are you sure you wanna delete &apos;{documentName}&apos;?</DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsDeleteOpen(false);
+                        }}
+                        className="w-24 py-2 border border-gray-200 hover:border-lime-500 text-lime-500 hover:text-black rounded-md cursor-pointer hover:bg-lime-100 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={(e) => handleDelete(e, doc)}
+                        className="w-24 py-2 border border-red-500 hover:border-red-600 text-white rounded-md cursor-pointer bg-red-500 hover:bg-red-600 transition-colors"
+                      >
+                        Delete
+                      </button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
                 <DropdownMenuItem
                   onSelect={(e) => e.preventDefault()}
                   onClick={(e) => {
