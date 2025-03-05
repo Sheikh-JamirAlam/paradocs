@@ -2,7 +2,7 @@
 
 import NextLink from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { BACKEND_URL } from "@/app/lib/constants/urls";
 import { getSession } from "@/app/server/actions/sessions";
@@ -23,7 +23,7 @@ import Table from "@tiptap/extension-table";
 import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import TableRow from "@tiptap/extension-table-row";
-import useSocket from "@/app/hooks/SocketHook";
+import useSocket from "@/app/hooks/useSocket";
 import MenubarNav from "@/app/components/Document/MenubarNav";
 import Toolbar from "@/app/components/Document/Toolbar";
 import { FontSize, PreserveSpaces } from "@/app/lib/extensions/tiptap";
@@ -34,6 +34,7 @@ import { debounce } from "lodash";
 export default function Page() {
   const { documentId } = useParams();
   const { user, isLoading } = useAuth();
+  const [users, setUsers] = useState<Record<string, { id: string; name: string }>>({});
   const [document, setDocument] = useState<{ title: string; content: string } | null>(null);
   const [isDocumentAccessible, setIsDocumentAccessible] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -133,7 +134,17 @@ export default function Page() {
     }
   }, [document, editor]);
 
-  const { updateContent } = useSocket(editor);
+  const memoizedUser = useMemo(() => {
+    return user ? { id: user.id, name: user.name } : null;
+  }, [user]);
+  const { updateContent, users: activeUsers } = useSocket(editor, documentId, memoizedUser);
+
+  useEffect(() => {
+    setUsers(activeUsers);
+    console.log("activeUsers", activeUsers);
+  }, [activeUsers]);
+
+  // const { updateContent } = useSocket(editor);
 
   if (isLoading || !document) return <Loader />;
 
@@ -151,6 +162,12 @@ export default function Page() {
   return (
     <div className="size-full overflow-x-auto bg-gray-100 px-4 print:p-0 print:bg-white print:overflow-visible">
       <div className="px-4 py-1 bg-gray-100 fixed top-0 left-0 right-0 z-10 print:hidden">
+        {Object.entries(users).map(([id, user]) => (
+          <div key={id} className="absolute mt-20 flex items-center space-x-2">
+            <span className="w-3 h-3 rounded-full"></span>
+            <span>{user.id}</span>
+          </div>
+        ))}
         <MenubarNav editor={editor} user={user} title={document?.title || "Untitled Document"} isSaving={isSaving} />
         <Toolbar editor={editor} />
       </div>
