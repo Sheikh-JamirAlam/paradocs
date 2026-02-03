@@ -12,17 +12,14 @@ import Underline from "@tiptap/extension-underline";
 import TaskList from "@tiptap/extension-task-list";
 import TaskItem from "@tiptap/extension-task-item";
 import TextAlign from "@tiptap/extension-text-align";
-import TextStyle from "@tiptap/extension-text-style";
+import { TextStyleKit } from "@tiptap/extension-text-style";
 import FontFamily from "@tiptap/extension-font-family";
 import Color from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import ImageResize from "tiptap-extension-resize-image";
-import Table from "@tiptap/extension-table";
-import TableCell from "@tiptap/extension-table-cell";
-import TableHeader from "@tiptap/extension-table-header";
-import TableRow from "@tiptap/extension-table-row";
+import { TableKit } from "@tiptap/extension-table";
 import useSocket from "@/app/hooks/useSocket";
 import MenubarNav from "@/app/components/Document/MenubarNav";
 import Toolbar from "@/app/components/Document/Toolbar";
@@ -91,15 +88,12 @@ export default function Page() {
     extensions: [
       StarterKit,
       Underline,
-      TextStyle,
+      TextStyleKit,
       FontFamily,
       Color,
       Image,
       ImageResize,
-      Table,
-      TableCell,
-      TableHeader,
-      TableRow,
+      TableKit,
       Highlight.configure({ multicolor: true }),
       Link.configure({
         openOnClick: false,
@@ -171,7 +165,7 @@ export default function Page() {
         <MenubarNav editor={editor} user={user} title={document?.title || "Untitled Document"} isSaving={isSaving} />
         <Toolbar editor={editor} />
       </div>
-      <div className="min-w-max flex justify-center w-[816px] py-4 pt-32 print:py-0 mx-auto print:w-full print:min-w-0 font-[Arial]">
+      <div className="min-w-max flex justify-center w-204 py-4 pt-32 print:py-0 mx-auto print:w-full print:min-w-0 font-[Arial]">
         <EditorContent editor={editor} />
       </div>
     </div>

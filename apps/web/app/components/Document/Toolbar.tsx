@@ -47,7 +47,7 @@ function HeadingSelect({ editor }: ToolbarProps) {
   return (
     <div className="flex gap-1">
       <DropdownMenu onOpenChange={setIsOpen}>
-        <DropdownMenuTrigger className={`w-[130px] px-2 py-1 flex items-center justify-between font-medium outline-0 ${isOpen ? "bg-gray-300" : "hover:bg-gray-300"} rounded-md cursor-pointer`}>
+        <DropdownMenuTrigger className={`w-32.5 px-2 py-1 flex items-center justify-between font-medium outline-0 ${isOpen ? "bg-gray-300" : "hover:bg-gray-300"} rounded-md cursor-pointer`}>
           {editor.isActive("heading", { level: 1 }) ? "Heading 1" : editor.isActive("heading", { level: 2 }) ? "Heading 2" : editor.isActive("heading", { level: 3 }) ? "Heading 3" : "Normal Text"}
           <ChevronDownIcon size={16} />
         </DropdownMenuTrigger>
@@ -78,7 +78,7 @@ function FontFamilySelect({ editor }: ToolbarProps) {
   return (
     <div className="flex gap-1">
       <DropdownMenu onOpenChange={setIsOpen}>
-        <DropdownMenuTrigger className={`w-[100px] px-2 py-1 flex items-center justify-between font-medium outline-0 rounded-md cursor-pointer ${isOpen ? "bg-gray-300" : "hover:bg-gray-300"}`}>
+        <DropdownMenuTrigger className={`w-25 px-2 py-1 flex items-center justify-between font-medium outline-0 rounded-md cursor-pointer ${isOpen ? "bg-gray-300" : "hover:bg-gray-300"}`}>
           <span className="truncate">
             {editor.getAttributes("textStyle").fontFamily === "'Comic Sans MS', 'Comic Sans'"
               ? "Comic Sans"
@@ -151,7 +151,7 @@ function FontSizeSelect({ editor }: ToolbarProps) {
         onBlur={() => updateFontSize(inputValue)}
         onKeyDown={handleKeyDown}
         type="text"
-        className="w-[30px] h-6 px-1 py-1 leading-loose my-auto text-center text-sm font-medium border border-gray-500 rounded-sm focus:outline outline-lime-700"
+        className="w-7.5 h-6 px-1 py-1 leading-loose my-auto text-center text-sm font-medium border border-gray-500 rounded-sm focus:outline outline-lime-700"
       />
       <button className="p-2 rounded-md cursor-pointer hover:bg-gray-300">
         <PlusIcon size={16} onClick={increment} />
@@ -362,7 +362,7 @@ function AlignSelect({ editor }: ToolbarProps) {
   return (
     <div className="flex gap-1">
       <DropdownMenu onOpenChange={setIsOpen}>
-        <DropdownMenuTrigger className={`w-[40px] px-1 py-2 flex items-center justify-between outline-0 ${isOpen ? "bg-gray-300" : "hover:bg-gray-300"} rounded-md cursor-pointer`}>
+        <DropdownMenuTrigger className={`w-10 px-1 py-2 flex items-center justify-between outline-0 ${isOpen ? "bg-gray-300" : "hover:bg-gray-300"} rounded-md cursor-pointer`}>
           {editor.isActive({ textAlign: "justify" }) ? (
             <AlignJustify size={16} className="text-black" />
           ) : editor.isActive({ textAlign: "right" }) ? (
@@ -413,13 +413,13 @@ export default function Toolbar({ editor }: ToolbarProps) {
           <Printer size={16} />
         </button>
       </div>
-      <div className="w-[1px] h-5 mx-2 bg-gray-400" />
+      <div className="w-px h-5 mx-2 bg-gray-400" />
       <HeadingSelect editor={editor} />
-      <div className="w-[1px] h-5 mx-2 bg-gray-400" />
+      <div className="w-px h-5 mx-2 bg-gray-400" />
       <FontFamilySelect editor={editor} />
-      <div className="w-[1px] h-5 mx-2 bg-gray-400" />
+      <div className="w-px h-5 mx-2 bg-gray-400" />
       <FontSizeSelect editor={editor} />
-      <div className="w-[1px] h-5 mx-2 bg-gray-400" />
+      <div className="w-px h-5 mx-2 bg-gray-400" />
       <div className="flex gap-1">
         <button onClick={() => editor.chain().focus().toggleBold().run()} className={`p-2 rounded-md cursor-pointer ${editor.isActive("bold") ? "bg-gray-300" : "hover:bg-gray-300"}`}>
           <Bold size={16} />
@@ -436,12 +436,12 @@ export default function Toolbar({ editor }: ToolbarProps) {
         <ColorPicker editor={editor} />
         <HighlightColorPicker editor={editor} />
       </div>
-      <div className="w-[1px] h-5 mx-2 bg-gray-400" />
+      <div className="w-px h-5 mx-2 bg-gray-400" />
       <div className="flex gap-1">
         <LinkOption editor={editor} />
         <ImageOption editor={editor} />
       </div>
-      <div className="w-[1px] h-5 mx-2 bg-gray-400" />
+      <div className="w-px h-5 mx-2 bg-gray-400" />
       <div className="flex gap-1">
         <AlignSelect editor={editor} />
         <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={`p-2 rounded-md cursor-pointer ${editor.isActive("bulletList") ? "bg-gray-300" : "hover:bg-gray-300"}`}>
