@@ -23,6 +23,7 @@ export const signupUser = async (req: Request, res: Response): Promise<void> => 
 
     res.status(200).json({ message: "User logged in", user: dbUser, token });
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
+    console.log(error);
+    res.status(500).json({ error });
   }
 };

@@ -38,6 +38,7 @@ import dynamic from "next/dynamic";
 
 interface ToolbarProps {
   editor: Editor | null;
+  isViewer?: boolean;
 }
 
 function HeadingSelect({ editor }: ToolbarProps) {
@@ -397,11 +398,11 @@ function AlignSelect({ editor }: ToolbarProps) {
   );
 }
 
-export default function Toolbar({ editor }: ToolbarProps) {
+export default function Toolbar({ editor, isViewer }: ToolbarProps) {
   if (!editor) return null;
 
   return (
-    <div className="px-4 py-1 flex items-center bg-slate-200 rounded-full">
+    <div className={`px-4 py-1 flex items-center bg-slate-200 rounded-full ${isViewer ? "pointer-events-none opacity-50" : ""}`}>
       <div className="flex gap-1">
         <button onClick={() => editor.chain().focus().undo().run()} className="p-2 rounded-md cursor-pointer hover:bg-gray-300">
           <Undo2 size={16} />

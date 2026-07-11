@@ -23,19 +23,22 @@ import Table from "@tiptap/extension-table";
 import TableCell from "@tiptap/extension-table-cell";
 import TableHeader from "@tiptap/extension-table-header";
 import TableRow from "@tiptap/extension-table-row";
-import useSocket from "@/app/hooks/useSocket";
 import MenubarNav from "@/app/components/Document/MenubarNav";
 import Toolbar from "@/app/components/Document/Toolbar";
 import { FontSize, PreserveSpaces } from "@/app/lib/extensions/tiptap";
 import { useAuth } from "@/app/hooks/useAuth";
 import Loader from "@/app/components/Document/Loader";
 import { debounce } from "lodash";
+import { useYjsCollaboration } from "@/app/hooks/useYjsCollaboration";
+import { createYjsCollaborationExtension } from "@/app/lib/extensions/yjsCollaboration";
 
 export default function Page() {
   const { documentId } = useParams();
   const { user, isLoading } = useAuth();
-  const [users, setUsers] = useState<Record<string, { id: string; name: string }>>({});
-  const [document, setDocument] = useState<{ title: string; content: string } | null>(null);
+  const memoizedUser = useMemo(() => {
+    return user ? { id: user.id, name: user.name } : null;
+  }, [user]);
+  const [document, setDocument] = useState<{ title: string; content: string; canEdit: boolean } | null>(null);
   const [isDocumentAccessible, setIsDocumentAccessible] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
@@ -72,7 +75,7 @@ export default function Page() {
           headers: {
             Authorization: `Bearer ${session}`,
           },
-        }
+        },
       );
     } catch (error) {
       console.error("Failed to save document:", error);
@@ -84,12 +87,12 @@ export default function Page() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSave = useCallback(
     debounce((content: string) => saveContent(content), 1000),
-    [documentId]
+    [documentId],
   );
 
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
+  const baseExtensions = useMemo(
+    () => [
+      StarterKit.configure({ history: false }),
       Underline,
       TextStyle,
       FontFamily,
@@ -112,39 +115,43 @@ export default function Page() {
       FontSize,
       PreserveSpaces,
     ],
-    content: document?.content || "",
-    editorProps: {
-      attributes: {
-        style: `padding-left: 51px; padding-right: 51px;`,
-        class: "focus:outline-none print:boder-0 border bg-white border-gray-300 flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text",
+    [],
+  );
+
+  const collaboration = useYjsCollaboration(typeof documentId === "string" ? documentId : undefined, memoizedUser, isDocumentAccessible);
+
+  const editorExtensions = useMemo(() => {
+    if (!collaboration) return baseExtensions;
+
+    return [...baseExtensions, createYjsCollaborationExtension(collaboration.fragment, collaboration.provider.awareness)];
+  }, [baseExtensions, collaboration]);
+
+  const editor = useEditor(
+    {
+      extensions: editorExtensions,
+      immediatelyRender: false,
+      editable: false,
+
+      editorProps: {
+        attributes: {
+          style: "padding-left: 51px; padding-right: 51px;",
+          class: "focus:outline-none print:boder-0 border bg-white border-gray-300 flex flex-col min-h-[1054px] w-[816px] pt-10 pr-14 pb-10 cursor-text",
+        },
+      },
+
+      onUpdate: ({ editor }) => {
+        if (!document?.canEdit) return;
+        const newContent = editor.getHTML();
+        setIsSaving(true);
+        debouncedSave(newContent);
       },
     },
-    immediatelyRender: false,
-    onUpdate: ({ editor }) => {
-      const newContent = editor.getHTML();
-      updateContent(newContent);
-      setIsSaving(true);
-      debouncedSave(newContent);
-    },
-  });
+    [collaboration],
+  );
 
   useEffect(() => {
-    if (document?.content && editor) {
-      editor.commands.setContent(document.content);
-    }
-  }, [document, editor]);
-
-  const memoizedUser = useMemo(() => {
-    return user ? { id: user.id, name: user.name } : null;
-  }, [user]);
-  const { updateContent, users: activeUsers } = useSocket(editor, documentId, memoizedUser);
-
-  useEffect(() => {
-    setUsers(activeUsers);
-    console.log("activeUsers", activeUsers);
-  }, [activeUsers]);
-
-  // const { updateContent } = useSocket(editor);
+    editor?.setEditable(document?.canEdit ?? false);
+  }, [editor, document?.canEdit]);
 
   if (isLoading || !document) return <Loader />;
 
@@ -159,17 +166,13 @@ export default function Page() {
     );
   }
 
+  if (!collaboration) return <Loader />;
+
   return (
-    <div className="size-full overflow-x-auto bg-gray-100 px-4 print:p-0 print:bg-white print:overflow-visible">
+    <div className="h-[100vh] size-full overflow-x-auto bg-gray-100 px-4 print:p-0 print:bg-white print:overflow-visible">
       <div className="px-4 py-1 bg-gray-100 fixed top-0 left-0 right-0 z-10 print:hidden">
-        {Object.entries(users).map(([id, user]) => (
-          <div key={id} className="absolute mt-20 flex items-center space-x-2">
-            <span className="w-3 h-3 rounded-full"></span>
-            <span>{user.id}</span>
-          </div>
-        ))}
-        <MenubarNav editor={editor} user={user} title={document?.title || "Untitled Document"} isSaving={isSaving} />
-        <Toolbar editor={editor} />
+        <MenubarNav editor={editor} user={user} title={document?.title || "Untitled Document"} isSaving={isSaving} isViewer={!document?.canEdit} />
+        <Toolbar editor={editor} isViewer={!document?.canEdit} />
       </div>
       <div className="min-w-max flex justify-center w-[816px] py-4 pt-32 print:py-0 mx-auto print:w-full print:min-w-0 font-[Arial]">
         <EditorContent editor={editor} />

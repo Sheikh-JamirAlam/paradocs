@@ -6,11 +6,18 @@ import { Editor } from "@tiptap/react";
 interface User {
   id: string;
   name: string;
+  cursor?: { x: number; y: number; height: number };
+}
+
+interface Cursor {
+  position: { x: number; y: number };
+  height: number;
 }
 
 export default function useSocket(editor: Editor | null, docId: string | string[] | undefined, user: User | null) {
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [users, setUsers] = useState<Record<string, User>>({});
+  const [cursor, setCursor] = useState<Record<string, Cursor>>({});
 
   useEffect(() => {
     if (!docId || !user) return;
@@ -23,7 +30,7 @@ export default function useSocket(editor: Editor | null, docId: string | string[
     };
 
     socket.onmessage = (message) => {
-      const { type, content, users } = JSON.parse(message.data);
+      const { type, content, users, userIdCursor, cursor } = JSON.parse(message.data);
 
       if (type === "content" && editor) {
         editor.commands.setContent(content);
@@ -31,6 +38,16 @@ export default function useSocket(editor: Editor | null, docId: string | string[
 
       if (type === "presence") {
         setUsers(users);
+      }
+
+      if (type === "cursor-position") {
+        setCursor((prev) => ({
+          ...prev,
+          [userIdCursor]: {
+            position: { x: cursor.x, y: cursor.y },
+            height: cursor.height,
+          },
+        }));
       }
     };
 
@@ -49,5 +66,11 @@ export default function useSocket(editor: Editor | null, docId: string | string[
     }
   };
 
-  return { updateContent, users };
+  const updateCursor = (userIdCursor: string, x: number, y: number, height: number) => {
+    if (socket && socket.readyState === WebSocket.OPEN) {
+      socket.send(JSON.stringify({ type: "update", docId, userIdCursor, cursor: { x, y, height } }));
+    }
+  };
+
+  return { updateContent, updateCursor, users, cursor };
 }

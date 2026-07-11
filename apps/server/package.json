@@ -14,7 +14,9 @@
     "@types/ws": "^8.5.14",
     "prisma": "^6.3.1",
     "tsc-watch": "^6.2.1",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "y-websocket": "^2.1.0",
+    "yjs": "^13.6.24"
   },
   "dependencies": {
     "@prisma/client": "^6.3.1",

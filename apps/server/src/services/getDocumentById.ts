@@ -2,7 +2,7 @@ import prisma from "../config/db";
 
 export const getDocumentById = async (documentId: string, userId: string) => {
   try {
-    const document = await prisma.document.findUnique({
+    const document = await prisma.document.findFirst({
       where: {
         id: documentId,
         OR: [
@@ -10,18 +10,42 @@ export const getDocumentById = async (documentId: string, userId: string) => {
           {
             collaborators: {
               some: {
-                userId: userId,
+                userId,
               },
             },
           },
         ],
       },
-      select: { id: true, title: true, content: true },
+
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        ownerId: true,
+
+        collaborators: {
+          where: {
+            userId,
+          },
+          select: {
+            role: true,
+          },
+        },
+      },
     });
+
     if (!document) {
       return { error: "Document does not exist for user" };
     }
-    return document;
+
+    const canEdit = document.ownerId === userId || document.collaborators.some((collaborator) => collaborator.role === "EDITOR");
+
+    return {
+      id: document.id,
+      title: document.title,
+      content: document.content,
+      canEdit,
+    };
   } catch (error) {
     throw new Error("Database error: " + error);
   }

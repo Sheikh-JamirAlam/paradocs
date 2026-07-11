@@ -26,7 +26,7 @@ interface UserProps {
   email: string;
 }
 
-export default function MenubarNav({ editor, user, title, isSaving }: { editor: Editor | null; user: UserProps | null; title: string; isSaving: boolean }) {
+export default function MenubarNav({ editor, user, title, isSaving, isViewer }: { editor: Editor | null; user: UserProps | null; title: string; isSaving: boolean; isViewer: boolean }) {
   const { documentId } = useParams();
   const [docName, setDocName] = useState(title);
   const [inputWidth, setInputWidth] = useState(108);
@@ -59,7 +59,7 @@ export default function MenubarNav({ editor, user, title, isSaving }: { editor: 
           headers: {
             Authorization: `Bearer ${session}`,
           },
-        }
+        },
       );
     } catch (error) {
       console.error("Failed to save document title:", error);
@@ -69,7 +69,7 @@ export default function MenubarNav({ editor, user, title, isSaving }: { editor: 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSave = useCallback(
     debounce((newTitle: string) => saveDocumentName(newTitle), 1000),
-    [documentId]
+    [documentId],
   );
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,7 +153,7 @@ export default function MenubarNav({ editor, user, title, isSaving }: { editor: 
         <Link href="/" className="text-4xl font-semibold font-serif underline">
           Paradocs
         </Link>
-        <div className="flex flex-col">
+        <div className={`flex flex-col ${isViewer ? "pointer-events-none" : ""}`}>
           <div className="font-medium flex items-center gap-1">
             <span ref={spanRef} className="px-2 text-lg invisible absolute whitespace-pre" aria-hidden="true">
               {docName}
@@ -342,7 +342,10 @@ export default function MenubarNav({ editor, user, title, isSaving }: { editor: 
         </div>
       </div>
       <div className="flex gap-2 items-center">
-        <div onClick={() => setIsShareDialogOpen(true)} className="px-6 py-2 font-medium bg-lime-200 hover:bg-lime-300 transition-colors rounded-full flex items-center gap-2 cursor-pointer">
+        <div
+          onClick={() => setIsShareDialogOpen(true)}
+          className={`px-6 py-2 font-medium bg-lime-200 hover:bg-lime-300 transition-colors rounded-full flex items-center gap-2 cursor-pointer ${isViewer ? "hidden" : ""}`}
+        >
           <Users className="size-4" />
           Share
         </div>

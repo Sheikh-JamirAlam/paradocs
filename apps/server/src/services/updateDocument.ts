@@ -11,6 +11,7 @@ export const updateDocument = async (documentId: string, userId: string, content
             collaborators: {
               some: {
                 userId: userId,
+                role: "EDITOR",
               },
             },
           },

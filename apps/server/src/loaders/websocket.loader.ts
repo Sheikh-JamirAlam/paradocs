@@ -1,84 +1,138 @@
 import { Server } from "http";
-import { WebSocket, WebSocketServer } from "ws";
+import { WebSocketServer } from "ws";
+import * as Y from "yjs";
+import prisma from "../config/db";
+import { verifyToken } from "../utils/jwt.service";
 
-interface User {
-  id: string;
-  name: string;
-}
+const { getYDoc, setPersistence, setupWSConnection } = require("y-websocket/bin/utils");
 
-interface DocumentState {
-  users: Record<string, User>;
-}
+const pendingWrites = new Map<string, NodeJS.Timeout>();
+const writeQueues = new Map<string, Promise<void>>();
 
-const documents: Record<string, DocumentState> = {};
+const persistYjsState = (documentId: string, ydoc: Y.Doc) => {
+  const yjsState = Buffer.from(Y.encodeStateAsUpdate(ydoc));
 
-export const initializeWebSocket = (server: Server) => {
-  const wss = new WebSocketServer({ server });
+  const previousWrite = writeQueues.get(documentId) ?? Promise.resolve();
 
-  function broadcast(ws: WebSocket, docId: string, data: any) {
-    if (data.type === "presence") {
-      wss.clients.forEach((client) => {
-        if (client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({ docId, ...data }));
-        }
+  const nextWrite = previousWrite
+    .catch(() => {})
+    .then(async () => {
+      await prisma.document.update({
+        where: { id: documentId },
+        data: { yjsState },
       });
-    } else {
-      wss.clients.forEach((client) => {
-        if (client !== ws && client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({ docId, ...data }));
-        }
-      });
+    });
+
+  writeQueues.set(documentId, nextWrite);
+
+  void nextWrite.finally(() => {
+    if (writeQueues.get(documentId) === nextWrite) {
+      writeQueues.delete(documentId);
     }
+  });
+
+  return nextWrite;
+};
+
+const scheduleYjsPersistence = (documentId: string, ydoc: Y.Doc) => {
+  const existingTimer = pendingWrites.get(documentId);
+
+  if (existingTimer) {
+    clearTimeout(existingTimer);
   }
 
-  wss.on("connection", (ws: WebSocket) => {
-    console.log("New WebSocket connection established");
+  const timer = setTimeout(() => {
+    pendingWrites.delete(documentId);
 
-    let userId: string;
-    let documentId: string;
+    void persistYjsState(documentId, ydoc).catch(console.error);
+  }, 1_000);
 
-    ws.on("message", (data) => {
-      try {
-        const message = JSON.parse(data.toString());
-        const { type, docId, user, content } = message;
+  pendingWrites.set(documentId, timer);
+};
 
-        documentId = docId;
-        userId = user?.id;
+const loading = new Map<string, Promise<void>>();
 
-        if (!documents[docId]) {
-          documents[docId] = { users: {} };
-        }
+setPersistence({
+  bindState(documentId: string, ydoc: Y.Doc) {
+    const load = (async () => {
+      const document = await prisma.document.findUnique({
+        where: { id: documentId },
+        select: { yjsState: true },
+      });
 
-        if (type === "join") {
-          documents[docId].users[userId] = {
-            id: userId,
-            name: user?.name,
-          };
-          broadcast(ws, docId, { type: "presence", users: documents[docId].users });
-        }
-
-        if (type === "update") {
-          broadcast(ws, docId, { type: "content", content });
-        }
-      } catch (error) {
-        console.error("Error processing WebSocket message:", error);
+      if (document?.yjsState) {
+        Y.applyUpdate(ydoc, document.yjsState);
       }
-    });
 
-    ws.on("close", () => {
-      if (documentId && userId) {
-        if (documents[documentId]) {
-          delete documents[documentId].users[userId];
+      ydoc.on("update", () => {
+        scheduleYjsPersistence(documentId, ydoc);
+      });
+    })();
 
-          if (Object.keys(documents[documentId].users).length === 0) {
-            delete documents[documentId];
-          }
+    loading.set(documentId, load);
+    void load.finally(() => loading.delete(documentId));
+  },
 
-          broadcast(ws, documentId, { type: "presence", users: documents[documentId]?.users || {} });
-        }
+  writeState: async (documentId: string, ydoc: Y.Doc) => {
+    const pendingTimer = pendingWrites.get(documentId);
+
+    if (pendingTimer) {
+      clearTimeout(pendingTimer);
+      pendingWrites.delete(documentId);
+    }
+
+    await persistYjsState(documentId, ydoc);
+  },
+});
+
+export const initializeWebSocket = (server: Server) => {
+  const wss = new WebSocketServer({ noServer: true });
+
+  server.on("upgrade", async (request, socket, head) => {
+    const url = new URL(request.url ?? "/", "http://localhost");
+    const match = url.pathname.match(/^\/collaboration\/([^/]+)$/);
+
+    if (!match) {
+      socket.destroy();
+      return;
+    }
+
+    try {
+      const documentId = decodeURIComponent(match[1]);
+      const token = url.searchParams.get("token");
+
+      if (!token) throw new Error("Missing token");
+
+      const payload = await verifyToken(token);
+      const canAccess = await prisma.document.findFirst({
+        where: {
+          id: documentId,
+          OR: [
+            { ownerId: payload.id },
+            {
+              collaborators: {
+                some: {
+                  userId: payload.id,
+                },
+              },
+            },
+          ],
+        },
+        select: { id: true },
+      });
+
+      if (!canAccess) {
+        throw new Error("Forbidden");
       }
-    });
 
-    ws.on("error", console.error);
+      getYDoc(documentId);
+      await loading.get(documentId);
+
+      wss.handleUpgrade(request, socket, head, (connection) => {
+        setupWSConnection(connection, request, { docName: documentId });
+      });
+    } catch {
+      socket.destroy();
+    }
   });
 };
