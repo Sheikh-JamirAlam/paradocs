@@ -19,10 +19,13 @@
     "yjs": "^13.6.24"
   },
   "dependencies": {
-    "@prisma/client": "^6.3.1",
-    "cors": "^2.8.5",
-    "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.2",
-    "ws": "^8.18.0"
+    "@prisma/adapter-pg": "^7.3.0",
+    "@prisma/client": "^7.3.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.18.0",
+    "ws": "^8.19.0"
   }
 }
